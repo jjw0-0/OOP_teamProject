@@ -20,7 +20,7 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{ matrix.java }}
-      - name: Make Gradle Executable
+      - name: Make gradlew executable
         run: chmod +x ./gradlew
       - name: Run tests (headless)
         run: ./gradlew --no-daemon test
