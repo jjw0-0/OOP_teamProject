@@ -1,0 +1,17 @@
+name: Issue
+description: 버그/기능/질문 공통 템플릿
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: 유형
+      options: [버그, 기능, 질문]
+  - type: textarea
+    id: what
+    attributes:
+      label: 내용 (무엇을 바꾸거나 해결하나요?)
+  - type: textarea
+    id: how
+    attributes:
+      label: 완료 조건 (체크 가능하게)
+      description: 예) 버튼 클릭 시 창 열림, 테스트 통과 등
