@@ -1,6 +1,6 @@
 # Build Files Ignore
-/build/
-/.gradle/
+build/
+.gradle/
 
 # IDE Files Ignore
 .idea/
