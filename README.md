@@ -7,3 +7,4 @@
 
 - 202411316 강지운 (PM, Developer, Reviewer, Presentation)
 - 202411342 김유진 (UI/UX Designer)
+- 202411545 엄초민 (Developer)
