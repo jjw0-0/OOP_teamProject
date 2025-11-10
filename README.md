@@ -11,3 +11,4 @@
 - 202411545 엄초민 (Developer)
 - 202411549 윤민서 (Developer)
 - 202311462 이지현 (Recording, Presentation)
+- 202411561 정은서 (Developer)
