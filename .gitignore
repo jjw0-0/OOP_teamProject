@@ -1,11 +1,16 @@
 # Build Files Ignore
 build/
 .gradle/
+bin/
+out/
 
 # IDE Files Ignore
 .idea/
 .vscode/
 .DS_Store
+
+# AI Files Ignore
+.claude/
 
 # Environment Files Ignore
 .env
