@@ -5,8 +5,7 @@ import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class GUIMain {
-    private static GUIMain main;
+public class LecturePageView {
     private void createAndShowGUI(){
             JFrame frame = new JFrame();
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -15,15 +14,16 @@ public class GUIMain {
             JPanel root = new JPanel(new BorderLayout());
             root.setPreferredSize(new Dimension(1000, 600)); // 240 + 760 = 1000
 
-            // === 왼쪽: 사이드바 영역 (240 x 600) ===
-            JPanel left = createLeftPanel();
+            // === 왼쪽 비어있는 공간(원래 사이드바 자리) ===
+            JPanel leftEmpty = new JPanel();
+            leftEmpty.setPreferredSize(new Dimension(240, 600));
+            root.add(leftEmpty, BorderLayout.WEST);
 
+            
             // === 오른쪽: 콘텐츠 영역 (760 x 600) ===
             JPanel right = createRightPanel();
 
-             // 루트에 배치
-            root.add(left, BorderLayout.WEST);     // 왼쪽 고정폭
-            root.add(right, BorderLayout.CENTER);  // 나머지 채움(=760으로 고정됨)
+           
 
             // 스크롤
             JScrollPane rightScroll = new JScrollPane(right);
@@ -38,100 +38,7 @@ public class GUIMain {
             frame.setVisible(true);
     }
 
-    private JPanel createLeftPanel(){
-        JPanel left = new JPanel();
-        left.setBackground(new Color(12,74,110));
-        left.setPreferredSize(new Dimension(240, 600));
-        left.setLayout(null); 
-        
-        // 로고
-        JLabel logo = new JLabel("ILTAGANGSA");
-        logo.setForeground(Color.WHITE);
-        logo.setFont(new Font("Inknut Antiqua", Font.BOLD, 24));
-        logo.setBounds(25, 27, 210, 66);  // 위치/크기 설정
-        left.add(logo);
-        
-        // 메뉴 버튼들
-        String[] menuText = { "홈", "강의", "강사", "마이페이지", "도움말" };
-        int baseX = 12, baseY = 133, menuW = 216, itemH = 45, gap = 10;
-        for (int i = 0; i < menuText.length; i++) {
-            int y = baseY + i * (itemH + gap);
-            JButton menuBtn = new JButton(menuText[i]);
-            menuBtn.setBounds(baseX, y, menuW, itemH);
-            menuBtn.setFont(new Font("Malgun Gothic", Font.PLAIN, 18));
-            menuBtn.setForeground(Color.WHITE);
-            menuBtn.setBackground(new Color(12, 74, 110));
-            menuBtn.setFocusPainted(false);
-            menuBtn.setBorderPainted(false);
-            menuBtn.setContentAreaFilled(true);
-            menuBtn.setHorizontalAlignment(SwingConstants.LEFT);
-            menuBtn.setMargin(new Insets(0, 15, 0, 0));
-            
-            // 호버 효과
-            Color defaultBg = new Color(12, 74, 110);
-            Color hoverBg = new Color(25, 95, 135);
-            
-            menuBtn.addMouseListener(new MouseAdapter() {
-                public void mouseEntered(MouseEvent e) {
-                    menuBtn.setBackground(hoverBg);
-                }
-                public void mouseExited(MouseEvent e) {
-                    menuBtn.setBackground(defaultBg);
-                }
-            });
-            
-            left.add(menuBtn);
-        }
-        
-        // 하단 로그인/회원가입 버튼
-        int bottomY = 450;
-        
-        // 로그인 버튼
-        JButton loginBtn = new JButton("로그인");
-        loginBtn.setBounds(33, bottomY, 102, 45);
-        loginBtn.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
-        loginBtn.setForeground(new Color(12, 74, 110));
-        loginBtn.setBackground(Color.WHITE);
-        loginBtn.setFocusPainted(false);
-        loginBtn.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
-        loginBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
-        loginBtn.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) {
-                loginBtn.setBackground(new Color(240, 240, 240));
-            }
-            public void mouseExited(MouseEvent e) {
-                loginBtn.setBackground(Color.WHITE);
-            }
-        });
-        
-        left.add(loginBtn);
-        
-        // 회원가입 버튼
-        JButton signupBtn = new JButton("회원가입");
-        signupBtn.setBounds(33, bottomY + 55, 100, 30);
-        signupBtn.setFont(new Font("Malgun Gothic", Font.PLAIN, 12));
-        signupBtn.setForeground(Color.WHITE);
-        signupBtn.setBackground(new Color(12, 74, 110));
-        signupBtn.setFocusPainted(false);
-        signupBtn.setBorderPainted(false);
-        signupBtn.setContentAreaFilled(false);
-        signupBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
-        final String originalText = "회원가입";
-        signupBtn.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) {
-                signupBtn.setText("<html><u>" + originalText + "</u></html>");
-            }
-            public void mouseExited(MouseEvent e) {
-                signupBtn.setText(originalText);
-            }
-        });
-        
-        left.add(signupBtn);
-        return left;
-    }
-
+  
     private JPanel createRightPanel(){
         JPanel right = new JPanel();
         right.setBackground(Color.WHITE); // 흰색 배경
@@ -328,17 +235,9 @@ public class GUIMain {
     }
    
         
-       
-    
-
-    public void startGUI(){
-        SwingUtilities.invokeLater(() -> {
-            createAndShowGUI();
-        });
-    }
-        
     public static void main(String[] args) {
-        main = new GUIMain();
-        main.startGUI();
-    }
-}
+    	  SwingUtilities.invokeLater(() -> {
+              new LecturePageView().createAndShowGUI();
+          });
+      }
+  }
