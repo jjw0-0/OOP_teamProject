@@ -1,4 +1,4 @@
-package Instructors;
+package com.project.app.view.Instructors;
 
 import javax.swing.*;
 import java.awt.*;

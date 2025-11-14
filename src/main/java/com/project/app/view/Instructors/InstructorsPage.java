@@ -1,4 +1,4 @@
-package Instructors;
+package com.project.app.view.Instructors;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -243,85 +243,15 @@ public class InstructorsPage extends JFrame{
         sidePanel.setPreferredSize(new Dimension(240,600));
         sidePanel.setBackground(new Color(0x0C4A6E)); // 배경
 
-        sidePanel.add(Box.createVerticalStrut(27)); // 로고 위 여백 27
-        sidePanel.add(setupLogo());
-        sidePanel.add(Box.createVerticalStrut(40)); // 로고 아래 여백 40
 
-        sidePanel.add(setupSideMenu());
-        sidePanel.add(Box.createVerticalStrut(68)); // 사이드메뉴 아래 여백 68
-
-        sidePanel.add(setupAuthMenu());
 
         container.add(sidePanel,BorderLayout.WEST);
 
         return sidePanel;
     }
 
-    JPanel setupLogo(){
-        JPanel logoPanel=new JPanel();
-        logoPanel.setLayout(new BoxLayout(logoPanel,BoxLayout.X_AXIS)); // 로고 패널은 수평정렬 BoxLayout
-        logoPanel.setMaximumSize(new Dimension(210,66));
-        logoPanel.add(Box.createHorizontalStrut(17));
-        logoPanel.setBackground(new Color(0x0C4A6E)); // 배경#0C4A6E
 
-        JLabel logo=new JLabel("ILTAGANGSA");
-        logo.setFont(new Font("Inknut Antiqua",Font.PLAIN,24));
-        logo.setForeground(Color.white);
 
-        logoPanel.add(logo);
-
-        return logoPanel;
-    }
-    JPanel setupSideMenu(){
-        JPanel menuPanel=new JPanel();
-        menuPanel.setLayout(new BoxLayout(menuPanel,BoxLayout.Y_AXIS)); // 메뉴 패널 수직정렬
-        menuPanel.setMaximumSize(new Dimension(226,261));
-        menuPanel.setPreferredSize(new Dimension(226,261));
-        menuPanel.setBackground(new Color(0x0C4A6E));
-
-        //menuPanel.setBorder(new EmptyBorder(0,0,0,0));
-        menuPanel.add(createMenuItemPanel("홈"));
-        menuPanel.add(Box.createVerticalStrut(9));
-        menuPanel.add(createMenuItemPanel("강의"));
-        menuPanel.add(Box.createVerticalStrut(9));
-        menuPanel.add(createMenuItemPanel("강사"));
-        menuPanel.add(Box.createVerticalStrut(9));
-        menuPanel.add(createMenuItemPanel("마이페이지"));
-        menuPanel.add(Box.createVerticalStrut(9));
-        menuPanel.add(createMenuItemPanel("도움말"));
-
-        return menuPanel;
-
-    }
-    JPanel createMenuItemPanel(String text){
-        JPanel menuItemPanel=new JPanel();
-        menuItemPanel.setLayout(new BorderLayout());
-        menuItemPanel.setMaximumSize(new Dimension(240,45));
-        menuItemPanel.setBackground(new Color(0x0C4A6E));//new Color(0x0C4A6E)
-        menuItemPanel.setBorder(new EmptyBorder(0,0,0,0));
-        menuItemPanel.add(Box.createVerticalStrut(9), BorderLayout.SOUTH);
-
-        JLabel label=new JLabel(text);
-        label.setFont(new Font("맑은 고딕",Font.BOLD,15));
-        label.setForeground(Color.white);
-        label.setBorder(new EmptyBorder(0,7,0,13));
-        menuItemPanel.add(label,BorderLayout.WEST);
-
-        return menuItemPanel;
-    }
-    // 로그인, 회원가입
-    JPanel setupAuthMenu(){
-        JPanel authMenu=new JPanel();
-        authMenu.setLayout(new BoxLayout(authMenu,BoxLayout.Y_AXIS)); // 수직정렬
-        authMenu.setMaximumSize(new Dimension(226,90));
-        authMenu.setBackground(new Color(0x0C4A6E));
-
-        authMenu.add(createMenuItemPanel("로그인"));
-        authMenu.add(Box.createVerticalStrut(9));
-        authMenu.add(createMenuItemPanel("회원가입"));
-
-        return authMenu;
-    }
 
     static JScrollPane createScrollPane(JPanel panel, int width, int height){
         JScrollPane scrollPane=new JScrollPane(panel);
