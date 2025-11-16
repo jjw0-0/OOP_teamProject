@@ -1,21 +1,30 @@
-package javaStudy;
+package com.project.app.view;
 
 import java.awt.*;
 import javax.swing.*;
+import com.project.app.service.SignInService;
 
-public class SignInFrame extends JFrame {
+/**
+ * 로그인 화면 뷰 (JPanel)
+ *
+ * 기능:
+ * - SidePanel 우측 콘텐츠 영역에 들어갈 "로그인" 화면
+ * - 사용자 ID/PW 입력 및 로그인 버튼 제공
+ * - 회원가입 버튼을 통한 화면 전환 기능 제공
+ *
+ */
+public class SignInView extends JPanel {
 
     private JTextField idField;
     private JPasswordField pwField;
     private SignInService service;
 
-    public SignInFrame() {
-        super("ILTAGANGSA - Login");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(400, 500);
-        setLocationRelativeTo(null);
-
+    public SignInView() {
         service = new SignInService();
+
+        // JPanel 기본 설정 (기존 JFrame 크기와 유사하게 설정)
+        setPreferredSize(new Dimension(400, 500));
+        setLayout(new BorderLayout());
 
         JPanel root = new JPanel(new BorderLayout(10, 10));
         root.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
@@ -78,23 +87,34 @@ public class SignInFrame extends JFrame {
 
         pwField.addActionListener(e -> loginBtn.doClick());
         
+        // 회원가입 버튼 클릭 시 회원가입 화면으로 전환
         signupBtn.addActionListener(e -> {
-            //new SignupFrame().setVisible(true);
-            this.dispose();
+            SidePanel.getInstance().showContent(new SignUpView());
+            SidePanel.getInstance().setSelectedItem(SidePanel.MenuItem.SIGNUP);
         });
     }
 
+    /**
+     * 로그인 처리 메서드
+     *
+     * 동작 원리:
+     * 1. ID와 PW를 가져와 SignInService의 login 메서드 호출
+     * 2. 반환된 결과에 따라 적절한 메시지 표시
+     * 3. 로그인 성공 시 필드 초기화 (향후 메인 화면으로 전환 로직 추가 필요)
+     */
     private void handleLogin() {
         String id = idField.getText().trim();
         String pw = new String(pwField.getPassword());
-        
+
         String result = service.login(id, pw);
-        
+
         if (result.equals("SUCCESS")) {
             JOptionPane.showMessageDialog(this, "로그인 성공!\n환영합니다, " + id + "님!", "로그인 성공", JOptionPane.INFORMATION_MESSAGE);
             idField.setText("");
             pwField.setText("");
-            //new GangsaFrame().setVisible(true);
+            // 로그인 성공 후 홈 화면으로 전환
+            SidePanel.getInstance().showContent(new HomePageView());
+            SidePanel.getInstance().setSelectedItem(SidePanel.MenuItem.HOME);
         } else if (result.equals("EMPTY")) {
             JOptionPane.showMessageDialog(this, "ID와 PW를 입력하세요.", "오류", JOptionPane.WARNING_MESSAGE);
         } else if (result.equals("USER_NOT_FOUND")) {
@@ -104,9 +124,5 @@ public class SignInFrame extends JFrame {
             pwField.setText("");
             pwField.requestFocus();
         }
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new SignInFrame().setVisible(true));
     }
 }

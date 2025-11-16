@@ -6,6 +6,11 @@ import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.project.app.view.HomePageView;
+import com.project.app.view.InstructorsPageView;
+import com.project.app.view.SignInView;
+import com.project.app.view.SignUpView;
+
 /**
  * 메인 애플리케이션 프레임
  *
@@ -310,40 +315,51 @@ public class SidePanel extends JFrame {
      *
      * 기능:
      * - 각 메뉴 항목에 기본 동작을 연결
-     * - 마이페이지 메뉴 클릭 시 MyPageView 표시
-     * - 다른 메뉴는 간단한 안내 메시지 표시 (추후 실제 콘텐츠로 교체)
+     * - 구현된 View는 실제 화면으로, 미구현된 메뉴는 플레이스홀더로 표시
      *
      * 핵심 내용:
-     * - MYPAGE 메뉴: MyPageView 인스턴스 생성 및 표시
-     * - 기타 메뉴: 준비 중 메시지를 표시하는 임시 패널 생성
+     * - HOME: HomePageView 인스턴스 생성 및 표시
+     * - LECTURE: 아직 미구현으로 플레이스홀더 표시
+     * - INSTRUCTOR: InstructorsPageView 인스턴스 생성 및 표시
+     * - MYPAGE: MyPageView 인스턴스 생성 및 표시
+     * - HELP: 아직 미구현으로 플레이스홀더 표시
+     * - LOGIN: SignInView 인스턴스 생성 및 표시
+     * - SIGNUP: SignUpView 인스턴스 생성 및 표시
      */
     private void setupDefaultMenuListeners() {
-        setMenuListener(MenuItem.MYPAGE, e -> {
-            showContent(new MyPageView());
-        });
-
+        // 홈 페이지
         setMenuListener(MenuItem.HOME, e -> {
-            showContent(createPlaceholderContent("홈 페이지"));
+            showContent(new HomePageView());
         });
 
+        // 강의 목록 (아직 미구현)
         setMenuListener(MenuItem.LECTURE, e -> {
             showContent(createPlaceholderContent("강의 목록"));
         });
 
+        // 강사 목록
         setMenuListener(MenuItem.INSTRUCTOR, e -> {
-            showContent(createPlaceholderContent("강사 목록"));
+            showContent(new InstructorsPageView());
         });
 
+        // 마이페이지
+        setMenuListener(MenuItem.MYPAGE, e -> {
+            showContent(new MyPageView());
+        });
+
+        // 도움말 (아직 미구현)
         setMenuListener(MenuItem.HELP, e -> {
             showContent(createPlaceholderContent("도움말"));
         });
 
+        // 로그인
         setMenuListener(MenuItem.LOGIN, e -> {
-            showContent(createPlaceholderContent("로그인"));
+            showContent(new SignInView());
         });
 
+        // 회원가입
         setMenuListener(MenuItem.SIGNUP, e -> {
-            showContent(createPlaceholderContent("회원가입"));
+            showContent(new SignUpView());
         });
     }
 
@@ -617,10 +633,11 @@ public class SidePanel extends JFrame {
      */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            SidePanel mainFrame = SidePanel.getInstance();
+            // SidePanel 인스턴스 생성 (싱글톤 패턴으로 자동으로 화면에 표시됨)
+            SidePanel.getInstance();
             System.out.println("SidePanel 테스트 실행 중...");
             System.out.println("좌측 메뉴를 클릭하여 콘텐츠 교체를 확인하세요.");
-            System.out.println("마이페이지는 실제 콘텐츠, 나머지는 플레이스홀더가 표시됩니다.");
+            System.out.println("이제 모든 View가 실제로 연결되어 있습니다.");
         });
     }
 }

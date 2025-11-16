@@ -606,7 +606,7 @@ public class MyPageView extends JPanel {
      * - 추후 실제 User Model이나 API 응답으로 교체 예정
      */
     private UserInfo getMockUserInfo() {
-        return new UserInfo("hong1234", "홍길동", "2005-03-15");
+        return new UserInfo("hong1234", "홍길동", "2008-01-01");
     }
 
     /**
@@ -617,8 +617,7 @@ public class MyPageView extends JPanel {
      * - 실제로는 사용자가 수강하는 강의의 요일 정보를 집계
      */
     private ScheduleInfo getMockScheduleInfo() {
-        // 월(2), 화(0), 수(1), 목(0), 금(3), 토(0), 일(0)
-        return new ScheduleInfo(new int[]{2, 0, 1, 0, 3, 0, 0});
+        return new ScheduleInfo(new int[]{2, 1, 2, 1, 2, 0, 0});
     }
 
     /**
@@ -630,12 +629,11 @@ public class MyPageView extends JPanel {
      */
     private List<LectureInfo> getMockLectures() {
         List<LectureInfo> lectures = new ArrayList<>();
-        lectures.add(new LectureInfo("수학 고급반", "월, 금"));
-        lectures.add(new LectureInfo("영어 독해 집중", "화, 목"));
-        lectures.add(new LectureInfo("국어 문법 특강", "수"));
-        lectures.add(new LectureInfo("과학 실험반", "금"));
-        lectures.add(new LectureInfo("사회 탐구 심화", "월"));
-        lectures.add(new LectureInfo("물리학 기초", "화"));
+        lectures.add(new LectureInfo("고등 수학 I", "월, 수"));
+        lectures.add(new LectureInfo("물리 기본 개념", "수, 금"));
+        lectures.add(new LectureInfo("한국사 입문", "월"));
+        lectures.add(new LectureInfo("문학 읽기 I", "화"));
+        lectures.add(new LectureInfo("수학 II", "목, 금"));
         return lectures;
     }
 
@@ -648,13 +646,15 @@ public class MyPageView extends JPanel {
      */
     private List<PaymentItem> getMockPayments() {
         List<PaymentItem> payments = new ArrayList<>();
-        payments.add(new PaymentItem("수학 고급반", -20000, "강의"));
-        payments.add(new PaymentItem("수학 고급 교재", -15000, "교재"));
-        payments.add(new PaymentItem("영어 독해 집중", -25000, "강의"));
-        payments.add(new PaymentItem("영어 독해 교재", -18000, "교재"));
-        payments.add(new PaymentItem("국어 문법 특강", -22000, "강의"));
-        payments.add(new PaymentItem("국어 문법 교재", -12000, "교재"));
-        payments.add(new PaymentItem("과학 실험반", -28000, "강의"));
+        payments.add(new PaymentItem("고등 수학 I", -150000, "강의"));
+        payments.add(new PaymentItem("수학의 정석", -25000, "교재"));
+        payments.add(new PaymentItem("영어 리딩 마스터", -22000, "교재"));
+        payments.add(new PaymentItem("물리 기본 개념", -140000, "강의"));
+        payments.add(new PaymentItem("한국사 입문", -120000, "강의"));
+        payments.add(new PaymentItem("한국사 바로알기", -15000, "교재"));
+        payments.add(new PaymentItem("문학 읽기 I", -135000, "강의"));
+        payments.add(new PaymentItem("현대문학 작품 읽기", -20000, "교재"));
+        payments.add(new PaymentItem("수학 II", -155000, "강의"));
         return payments;
     }
 }

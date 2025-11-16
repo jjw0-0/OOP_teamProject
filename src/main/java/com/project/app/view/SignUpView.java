@@ -1,11 +1,20 @@
-package user;
+package com.project.app.view;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Calendar;
+import com.project.app.service.SignUpService;
 
-// UI 전용
-public class SignUpFrame extends JFrame {
+/**
+ * 회원가입 화면 뷰 (JPanel)
+ *
+ * 기능:
+ * - SidePanel 우측 콘텐츠 영역에 들어갈 "회원가입" 화면
+ * - 사용자 정보 입력 (이름, 생년월일, ID, PW)
+ * - 회원가입/취소 버튼 제공
+ *
+ */
+public class SignUpView extends JPanel {
 
     JTextField tfId, tfName;
     JPasswordField pfPw;
@@ -14,13 +23,12 @@ public class SignUpFrame extends JFrame {
 
     private SignUpService service; // 로직 클래스
 
-    public SignUpFrame() {
+    public SignUpView() {
         service = new SignUpService(); // 서비스 객체 생성
 
-        setTitle("회원가입");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(400, 500);
-        setLayout(null);
+        // JPanel 기본 설정 (기존 JFrame 크기와 유사하게 설정)
+        setPreferredSize(new Dimension(400, 500));
+        setLayout(null); // 기존 null layout 유지
 
         JLabel lblTitle = new JLabel("ILTAGANGSA 회원가입", SwingConstants.CENTER);
         lblTitle.setFont(new Font("맑은 고딕", Font.BOLD, 20));
@@ -102,12 +110,22 @@ public class SignUpFrame extends JFrame {
 
         // 이벤트 등록
         btnSignUp.addActionListener(e -> service.handleSignUp(tfId, pfPw, tfName, cbYear, cbMonth, cbDay, this));
-        btnCancel.addActionListener(e -> service.handleCancel(this));
 
-        setLocationRelativeTo(null);
-        setVisible(true);
+        // 취소 버튼 클릭 시 로그인 화면으로 전환
+        btnCancel.addActionListener(e -> {
+            SidePanel.getInstance().showContent(new SignInView());
+            SidePanel.getInstance().setSelectedItem(SidePanel.MenuItem.LOGIN);
+        });
     }
 
+    /**
+     * 생년월일의 일(day) 콤보박스를 업데이트하는 메서드
+     *
+     * 동작 원리:
+     * - 선택된 연도와 월에 따라 해당 월의 날짜 수를 계산
+     * - SignUpService의 getDaysInMonth 메서드를 활용하여 윤년 처리
+     * - 콤보박스를 다시 채워서 사용자가 올바른 날짜를 선택할 수 있도록 함
+     */
     private void updateDays() {
         int selectedYear = (int) cbYear.getSelectedItem();
         int selectedMonth = (int) cbMonth.getSelectedItem();
@@ -115,9 +133,5 @@ public class SignUpFrame extends JFrame {
 
         cbDay.removeAllItems();
         for (int d = 1; d <= daysInMonth; d++) cbDay.addItem(d);
-    }
-
-    public static void main(String[] args) {
-        new SignUpFrame();
     }
 }

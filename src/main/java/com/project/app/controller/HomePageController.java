@@ -1,13 +1,9 @@
-package main.java.com.project.app.controller;
+package com.project.app.controller;
 
-import main.java.com.project.app.model.HomePageModel;
-import main.java.com.project.app.view.HomePageView;
-import main.java.com.project.app.view.HomePageView.HomeImageView;
+import com.project.app.model.HomePageModel;
+import com.project.app.view.HomePageView.HomeImageView;
 
 import javax.swing.*;
-import java.awt.*;
-import java.util.Arrays;
-import java.util.List;
 
 // ======== Controller ========
 

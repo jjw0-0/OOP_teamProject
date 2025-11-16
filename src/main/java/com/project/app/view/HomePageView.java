@@ -1,28 +1,29 @@
-package main.java.com.project.app.view;
+package com.project.app.view;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
 
-import main.java.com.project.app.model.HomePageModel;
-import main.java.com.project.app.controller.HomePageController;
+import com.project.app.model.HomePageModel;
+import com.project.app.controller.HomePageController;
 
 /**
  * 홈 화면 뷰
  *
- * 역할:
+ * 기능:
  * - SidePanel 우측 콘텐츠 영역에 들어갈 "홈" 화면
  * - 내부에 MVC 구조(HomeImageModel, HomeImageView, HomeImageController)를 사용하여
  *   이미지 슬라이더(이전/다음) 기능 제공
  *
- * 사용 예 (나중에 SidePanel에서 쓸 때):
- *   SidePanel.getInstance().showContent(new HomePageView());
  */
 public class HomePageView extends JPanel {
 
     private final HomePageModel model;
     private final HomeImageView view;
+
+    // Controller는 View와 Model을 연결하는 역할만 하므로 필드로 유지
+    @SuppressWarnings("unused")
     private final HomePageController controller;
 
     public HomePageView() {
@@ -165,22 +166,4 @@ public class HomePageView extends JPanel {
             g2.dispose();
         }
     }
-
-
-
-    // ======== 단독 테스트용 main (원하면 삭제해도 됨) ========
-
-    // public static void main(String[] args) {
-    //     SwingUtilities.invokeLater(() -> {
-    //         JFrame testFrame = new JFrame("홈 화면 테스트");
-    //         testFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    //         testFrame.setSize(760, 600);
-    //         testFrame.setLocationRelativeTo(null);
-
-    //         testFrame.setLayout(new BorderLayout());
-    //         testFrame.add(new HomePageView(), BorderLayout.CENTER);
-
-    //         testFrame.setVisible(true);
-    //     });
-    // }
 }
