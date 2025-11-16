@@ -99,9 +99,43 @@ public class HomePageView extends JPanel {
             imageLabel.add(nextButton, BorderLayout.EAST);
         }
 
+        /**
+         * 이미지를 패널 크기에 맞춰 비율을 유지하면서 스케일링하여 표시
+         * - 패널 크기: 760x600 (preferred size)
+         * - 이미지 비율을 유지하면서 패널에 맞게 조정
+         */
         public void setImageIcon(ImageIcon icon) {
             imageLabel.setText(null);
-            imageLabel.setIcon(icon);
+
+            if (icon == null || icon.getImage() == null) {
+                imageLabel.setIcon(null);
+                return;
+            }
+
+            // 원본 이미지 크기
+            int originalWidth = icon.getIconWidth();
+            int originalHeight = icon.getIconHeight();
+
+            // 패널 크기 (preferred size 기준)
+            int panelWidth = 760;
+            int panelHeight = 600;
+
+            // 비율을 유지하면서 패널에 맞게 스케일링
+            double widthRatio = (double) panelWidth / originalWidth;
+            double heightRatio = (double) panelHeight / originalHeight;
+            double scale = Math.min(widthRatio, heightRatio); // 비율 유지를 위해 더 작은 비율 사용
+
+            int scaledWidth = (int) (originalWidth * scale);
+            int scaledHeight = (int) (originalHeight * scale);
+
+            // 이미지 스케일링 (SCALE_SMOOTH: 부드러운 스케일링)
+            Image scaledImage = icon.getImage().getScaledInstance(
+                scaledWidth,
+                scaledHeight,
+                Image.SCALE_SMOOTH
+            );
+
+            imageLabel.setIcon(new ImageIcon(scaledImage));
         }
 
         public void setNoImageText(String text) {
