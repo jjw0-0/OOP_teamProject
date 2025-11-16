@@ -10,28 +10,18 @@ public class LecturePageView {
             JFrame frame = new JFrame();
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-            // 루트 패널: BorderLayout 사용
-            JPanel root = new JPanel(new BorderLayout());
-            root.setPreferredSize(new Dimension(1000, 600)); // 240 + 760 = 1000
-
-            // === 왼쪽 비어있는 공간(원래 사이드바 자리) ===
-            JPanel leftEmpty = new JPanel();
-            leftEmpty.setPreferredSize(new Dimension(240, 600));
-            root.add(leftEmpty, BorderLayout.WEST);
-
-            
-            // === 오른쪽: 콘텐츠 영역 (760 x 600) ===
+              // === 오른쪽: 콘텐츠 영역 (760 x 600) ===
             JPanel right = createRightPanel();
 
            
-
             // 스크롤
             JScrollPane rightScroll = new JScrollPane(right);
             rightScroll.setBorder(null);
             rightScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-            root.add(rightScroll, BorderLayout.CENTER);
+            rightScroll.setPreferredSize(new Dimension(760, 600));
+
             // 프레임 세팅
-            frame.setContentPane(root);
+            frame.setContentPane(rightScroll);
             frame.pack();               // preferred size 기준으로 프레임 맞춤
             frame.setResizable(false);  // 픽셀 정확히 유지
             frame.setLocationRelativeTo(null); // 화면 중아에 뜸
@@ -226,7 +216,7 @@ public class LecturePageView {
                 card.setBackground(Color.WHITE);
             }
             public void mouseClicked(MouseEvent e) {
-            	ShowDetail detail = new ShowDetail();
+            	ShowLectureDetail detail = new ShowLectureDetail();
             	detail.show();
             }
         });

@@ -1,10 +1,10 @@
-package table_demo;
+package com;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class ShowDetail {
+public class ShowLectureDetail {
 	private JDialog dialog;
     private String courseName;
     private String instructor;
@@ -15,12 +15,12 @@ public class ShowDetail {
     private int textbookPrice;
     
     // 기본 생성자 (테스트용 더미 데이터)
-    public ShowDetail() {
+    public ShowLectureDetail() {
         this("기초 확률과 통계","홍길동",3.0,"월요일","경기도 수원시 영통구 광교산로 154-42","기초 확률과 통계",16000);
     }
     
     // 매개변수 생성자 (실제 데이터 전달)
-    public ShowDetail(String courseName, String instructor, double rating,String schedule , String location,String textbook, int textbookPrice) {
+    public ShowLectureDetail(String courseName, String instructor, double rating,String schedule , String location,String textbook, int textbookPrice) {
         this.courseName = courseName;
         this.instructor = instructor;
         this.rating = rating;
