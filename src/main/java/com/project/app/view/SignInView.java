@@ -11,15 +11,36 @@ import com.project.app.service.SignInService;
  * - SidePanel 우측 콘텐츠 영역에 들어갈 "로그인" 화면
  * - 사용자 ID/PW 입력 및 로그인 버튼 제공
  * - 회원가입 버튼을 통한 화면 전환 기능 제공
+ * - 싱글톤 패턴을 사용하여 애플리케이션 전체에서 하나의 인스턴스만 유지
  *
  */
 public class SignInView extends JPanel {
+
+    // 싱글톤 패턴: private static 인스턴스 변수
+    private static SignInView instance;
+
+    /**
+     * 싱글톤 인스턴스를 반환하는 메서드
+     *
+     * 기능:
+     * - 인스턴스가 없으면 새로 생성하고, 있으면 기존 인스턴스 반환
+     * - 메모리 효율성과 상태 유지를 위함
+     *
+     * @return SignInView의 싱글톤 인스턴스
+     */
+    public static SignInView getInstance() {
+        if (instance == null) {
+            instance = new SignInView();
+        }
+        return instance;
+    }
 
     private JTextField idField;
     private JPasswordField pwField;
     private SignInService service;
 
-    public SignInView() {
+    // 싱글톤 패턴: private 생성자
+    private SignInView() {
         service = new SignInService();
 
         // JPanel 기본 설정 (기존 JFrame 크기와 유사하게 설정)
@@ -89,7 +110,7 @@ public class SignInView extends JPanel {
         
         // 회원가입 버튼 클릭 시 회원가입 화면으로 전환
         signupBtn.addActionListener(e -> {
-            SidePanel.getInstance().showContent(new SignUpView());
+            SidePanel.getInstance().showContent(SignUpView.getInstance());
             SidePanel.getInstance().setSelectedItem(SidePanel.MenuItem.SIGNUP);
         });
     }
@@ -113,7 +134,7 @@ public class SignInView extends JPanel {
             idField.setText("");
             pwField.setText("");
             // 로그인 성공 후 홈 화면으로 전환
-            SidePanel.getInstance().showContent(new HomePageView());
+            SidePanel.getInstance().showContent(HomePageView.getInstance());
             SidePanel.getInstance().setSelectedItem(SidePanel.MenuItem.HOME);
         } else if (result.equals("EMPTY")) {
             JOptionPane.showMessageDialog(this, "ID와 PW를 입력하세요.", "오류", JOptionPane.WARNING_MESSAGE);

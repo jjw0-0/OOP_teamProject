@@ -12,9 +12,29 @@ import com.project.app.service.SignUpService;
  * - SidePanel 우측 콘텐츠 영역에 들어갈 "회원가입" 화면
  * - 사용자 정보 입력 (이름, 생년월일, ID, PW)
  * - 회원가입/취소 버튼 제공
+ * - 싱글톤 패턴을 사용하여 애플리케이션 전체에서 하나의 인스턴스만 유지
  *
  */
 public class SignUpView extends JPanel {
+
+    // 싱글톤 패턴: private static 인스턴스 변수
+    private static SignUpView instance;
+
+    /**
+     * 싱글톤 인스턴스를 반환하는 메서드
+     *
+     * 기능:
+     * - 인스턴스가 없으면 새로 생성하고, 있으면 기존 인스턴스 반환
+     * - 메모리 효율성과 상태 유지를 위함
+     *
+     * @return SignUpView의 싱글톤 인스턴스
+     */
+    public static SignUpView getInstance() {
+        if (instance == null) {
+            instance = new SignUpView();
+        }
+        return instance;
+    }
 
     JTextField tfId, tfName;
     JPasswordField pfPw;
@@ -23,7 +43,8 @@ public class SignUpView extends JPanel {
 
     private SignUpService service; // 로직 클래스
 
-    public SignUpView() {
+    // 싱글톤 패턴: private 생성자
+    private SignUpView() {
         service = new SignUpService(); // 서비스 객체 생성
 
         // JPanel 기본 설정 (기존 JFrame 크기와 유사하게 설정)
@@ -113,7 +134,7 @@ public class SignUpView extends JPanel {
 
         // 취소 버튼 클릭 시 로그인 화면으로 전환
         btnCancel.addActionListener(e -> {
-            SidePanel.getInstance().showContent(new SignInView());
+            SidePanel.getInstance().showContent(SignInView.getInstance());
             SidePanel.getInstance().setSelectedItem(SidePanel.MenuItem.LOGIN);
         });
     }

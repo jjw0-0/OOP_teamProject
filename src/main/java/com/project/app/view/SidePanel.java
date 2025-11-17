@@ -6,12 +6,6 @@ import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.project.app.view.HomePageView;
-import com.project.app.view.InstructorsPageView;
-import com.project.app.view.LecturePageView;
-import com.project.app.view.SignInView;
-import com.project.app.view.SignUpView;
-
 /**
  * 메인 애플리케이션 프레임
  *
@@ -157,7 +151,7 @@ public class SidePanel extends JFrame {
         initializeFrame();
         createUI();
         setupDefaultMenuListeners();  // 기본 메뉴 리스너 설정
-        showContent(new MyPageView());  // 초기 콘텐츠: 마이페이지
+        showContent(MyPageView.getInstance());  // 초기 콘텐츠: 마이페이지
         setVisible(true);
     }
 
@@ -319,33 +313,33 @@ public class SidePanel extends JFrame {
      * - 구현된 View는 실제 화면으로, 미구현된 메뉴는 플레이스홀더로 표시
      *
      * 핵심 내용:
-     * - HOME: HomePageView 인스턴스 생성 및 표시
-     * - LECTURE: 아직 미구현으로 플레이스홀더 표시
-     * - INSTRUCTOR: InstructorsPageView 인스턴스 생성 및 표시
-     * - MYPAGE: MyPageView 인스턴스 생성 및 표시
+     * - HOME: HomePageView 싱글톤 인스턴스 반환 및 표시
+     * - LECTURE: LecturePageView 싱글톤 인스턴스 반환 및 표시
+     * - INSTRUCTOR: InstructorsPageView 싱글톤 인스턴스 반환 및 표시
+     * - MYPAGE: MyPageView 싱글톤 인스턴스 반환 및 표시
      * - HELP: 아직 미구현으로 플레이스홀더 표시
-     * - LOGIN: SignInView 인스턴스 생성 및 표시
-     * - SIGNUP: SignUpView 인스턴스 생성 및 표시
+     * - LOGIN: SignInView 싱글톤 인스턴스 반환 및 표시
+     * - SIGNUP: SignUpView 싱글톤 인스턴스 반환 및 표시
      */
     private void setupDefaultMenuListeners() {
         // 홈 페이지
         setMenuListener(MenuItem.HOME, e -> {
-            showContent(new HomePageView());
+            showContent(HomePageView.getInstance());
         });
 
         // 강의 목록
         setMenuListener(MenuItem.LECTURE, e -> {
-            showContent(new LecturePageView());
+            showContent(LecturePageView.getInstance());
         });
 
         // 강사 목록
         setMenuListener(MenuItem.INSTRUCTOR, e -> {
-            showContent(new InstructorsPageView());
+            showContent(InstructorsPageView.getInstance());
         });
 
         // 마이페이지
         setMenuListener(MenuItem.MYPAGE, e -> {
-            showContent(new MyPageView());
+            showContent(MyPageView.getInstance());
         });
 
         // 도움말 (아직 미구현)
@@ -355,12 +349,12 @@ public class SidePanel extends JFrame {
 
         // 로그인
         setMenuListener(MenuItem.LOGIN, e -> {
-            showContent(new SignInView());
+            showContent(SignInView.getInstance());
         });
 
         // 회원가입
         setMenuListener(MenuItem.SIGNUP, e -> {
-            showContent(new SignUpView());
+            showContent(SignUpView.getInstance());
         });
     }
 

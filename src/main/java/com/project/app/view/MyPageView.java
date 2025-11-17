@@ -14,6 +14,7 @@ import java.util.Locale;
  * 기능:
  * - 사용자의 개인 정보, 수강 중인 강의, 결제 내역을 표시하는 콘텐츠 패널
  * - SidePanel의 우측 콘텐츠 영역에 표시될 수 있는 재사용 가능한 컴포넌트
+ * - 싱글톤 패턴을 사용하여 애플리케이션 전체에서 하나의 인스턴스만 유지
  *
  * 핵심 내용:
  * - JPanel을 상속받아 SidePanel.showContent()로 쉽게 표시 가능
@@ -27,6 +28,25 @@ import java.util.Locale;
  * - 우측 그리드 (약 255px): 결제 내역
  */
 public class MyPageView extends JPanel {
+
+    // 싱글톤 패턴: private static 인스턴스 변수
+    private static MyPageView instance;
+
+    /**
+     * 싱글톤 인스턴스를 반환하는 메서드
+     *
+     * 기능:
+     * - 인스턴스가 없으면 새로 생성하고, 있으면 기존 인스턴스 반환
+     * - 메모리 효율성과 상태 유지를 위함
+     *
+     * @return MyPageView의 싱글톤 인스턴스
+     */
+    public static MyPageView getInstance() {
+        if (instance == null) {
+            instance = new MyPageView();
+        }
+        return instance;
+    }
 
     // ======================== 스타일 상수 ========================
 
@@ -150,7 +170,8 @@ public class MyPageView extends JPanel {
      * 2. GridLayout으로 3개의 열 생성
      * 3. 각 열에 프로필/일정, 강의 목록, 결제 내역 패널 추가
      */
-    public MyPageView() {
+    // 싱글톤 패턴: private 생성자
+    private MyPageView() {
         setLayout(new GridLayout(1, 3, StyleConstants.PADDING_SMALL, 0));
         setBackground(StyleConstants.BACKGROUND_COLOR);
         setBorder(new EmptyBorder(

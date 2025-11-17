@@ -12,10 +12,31 @@ import java.awt.event.*;
  * - SidePanel 우측 콘텐츠 영역에 들어갈 "강의" 화면
  * - 과목별 필터링, 정렬, 검색 기능 제공
  * - 강의 카드 클릭 시 상세 정보 다이얼로그 표시
+ * - 싱글톤 패턴을 사용하여 애플리케이션 전체에서 하나의 인스턴스만 유지
  */
 public class LecturePageView extends JPanel {
 
-    public LecturePageView() {
+    // 싱글톤 패턴: private static 인스턴스 변수
+    private static LecturePageView instance;
+
+    /**
+     * 싱글톤 인스턴스를 반환하는 메서드
+     *
+     * 기능:
+     * - 인스턴스가 없으면 새로 생성하고, 있으면 기존 인스턴스 반환
+     * - 메모리 효율성과 상태 유지를 위함
+     *
+     * @return LecturePageView의 싱글톤 인스턴스
+     */
+    public static LecturePageView getInstance() {
+        if (instance == null) {
+            instance = new LecturePageView();
+        }
+        return instance;
+    }
+
+    // 싱글톤 패턴: private 생성자
+    private LecturePageView() {
         // 760 x 600 크기의 메인 콘텐츠 패널
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);

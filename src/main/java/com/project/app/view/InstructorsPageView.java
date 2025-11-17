@@ -4,9 +4,35 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
+/**
+ * 강사 페이지 뷰
+ *
+ * 기능:
+ * - 싱글톤 패턴을 사용하여 애플리케이션 전체에서 하나의 인스턴스만 유지
+ */
 public class InstructorsPageView extends JPanel {
 
-    public InstructorsPageView() {
+    // 싱글톤 패턴: private static 인스턴스 변수
+    private static InstructorsPageView instance;
+
+    /**
+     * 싱글톤 인스턴스를 반환하는 메서드
+     *
+     * 기능:
+     * - 인스턴스가 없으면 새로 생성하고, 있으면 기존 인스턴스 반환
+     * - 메모리 효율성과 상태 유지를 위함
+     *
+     * @return InstructorsPageView의 싱글톤 인스턴스
+     */
+    public static InstructorsPageView getInstance() {
+        if (instance == null) {
+            instance = new InstructorsPageView();
+        }
+        return instance;
+    }
+
+    // 싱글톤 패턴: private 생성자
+    private InstructorsPageView() {
         setPreferredSize(new Dimension(760, 600));
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBackground(Color.WHITE);

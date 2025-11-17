@@ -15,9 +15,29 @@ import com.project.app.controller.HomePageController;
  * - SidePanel 우측 콘텐츠 영역에 들어갈 "홈" 화면
  * - 내부에 MVC 구조(HomeImageModel, HomeImageView, HomeImageController)를 사용하여
  *   이미지 슬라이더(이전/다음) 기능 제공
+ * - 싱글톤 패턴을 사용하여 애플리케이션 전체에서 하나의 인스턴스만 유지
  *
  */
 public class HomePageView extends JPanel {
+
+    // 싱글톤 패턴: private static 인스턴스 변수
+    private static HomePageView instance;
+
+    /**
+     * 싱글톤 인스턴스를 반환하는 메서드
+     *
+     * 기능:
+     * - 인스턴스가 없으면 새로 생성하고, 있으면 기존 인스턴스 반환
+     * - 메모리 효율성과 상태 유지를 위함
+     *
+     * @return HomePageView의 싱글톤 인스턴스
+     */
+    public static HomePageView getInstance() {
+        if (instance == null) {
+            instance = new HomePageView();
+        }
+        return instance;
+    }
 
     private final HomePageModel model;
     private final HomeImageView view;
@@ -26,7 +46,8 @@ public class HomePageView extends JPanel {
     @SuppressWarnings("unused")
     private final HomePageController controller;
 
-    public HomePageView() {
+    // 싱글톤 패턴: private 생성자
+    private HomePageView() {
         // 이 패널 자체가 SidePanel의 우측 CENTER에 들어간다고 가정
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
