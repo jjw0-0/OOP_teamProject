@@ -234,7 +234,17 @@ public class InstructorsPageView extends JPanel {
         }
 
         public ImageIcon getImage() {
-            return new ImageIcon(imagepath);
+            // resources 폴더에서 이미지 로드
+            try {
+                java.net.URL imageURL = getClass().getClassLoader().getResource("person.png");
+                if (imageURL != null) {
+                    return new ImageIcon(imageURL);
+                }
+            } catch (Exception e) {
+                System.err.println("이미지 로드 실패: " + e.getMessage());
+            }
+            // 실패 시 빈 ImageIcon 반환
+            return new ImageIcon();
         }
 
         public String getName() {

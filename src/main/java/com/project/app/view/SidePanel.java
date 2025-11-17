@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.project.app.view.HomePageView;
 import com.project.app.view.InstructorsPageView;
+import com.project.app.view.LecturePageView;
 import com.project.app.view.SignInView;
 import com.project.app.view.SignUpView;
 
@@ -332,9 +333,9 @@ public class SidePanel extends JFrame {
             showContent(new HomePageView());
         });
 
-        // 강의 목록 (아직 미구현)
+        // 강의 목록
         setMenuListener(MenuItem.LECTURE, e -> {
-            showContent(createPlaceholderContent("강의 목록"));
+            showContent(new LecturePageView());
         });
 
         // 강사 목록
