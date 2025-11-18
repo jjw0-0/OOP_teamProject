@@ -1,9 +1,20 @@
-package javaStudy;
+package com.project.app.service;
 
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 로그인 비즈니스 로직을 처리하는 서비스 클래스
+ *
+ * 기능:
+ * - users.txt 파일에서 사용자 정보를 로드
+ * - 로그인 검증 로직 수행 (ID/PW 확인)
+ *
+ * 주요 내용:
+ * 1. 생성자에서 users.txt 파일을 읽어 HashMap에 저장
+ * 2. login 메서드에서 입력값 검증 및 사용자 인증 수행
+ */
 public class SignInService {
 
     private Map<String, String> users = new HashMap<>();

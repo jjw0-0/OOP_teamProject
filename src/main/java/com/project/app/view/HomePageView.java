@@ -1,31 +1,53 @@
-package main.java.com.project.app.view;
+package com.project.app.view;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
 
-import main.java.com.project.app.model.HomePageModel;
-import main.java.com.project.app.controller.HomePageController;
+import com.project.app.model.HomePageModel;
+import com.project.app.controller.HomePageController;
 
 /**
  * 홈 화면 뷰
  *
- * 역할:
+ * 기능:
  * - SidePanel 우측 콘텐츠 영역에 들어갈 "홈" 화면
  * - 내부에 MVC 구조(HomeImageModel, HomeImageView, HomeImageController)를 사용하여
  *   이미지 슬라이더(이전/다음) 기능 제공
+ * - 싱글톤 패턴을 사용하여 애플리케이션 전체에서 하나의 인스턴스만 유지
  *
- * 사용 예 (나중에 SidePanel에서 쓸 때):
- *   SidePanel.getInstance().showContent(new HomePageView());
  */
 public class HomePageView extends JPanel {
 
+    // 싱글톤 패턴: private static 인스턴스 변수
+    private static HomePageView instance;
+
+    /**
+     * 싱글톤 인스턴스를 반환하는 메서드
+     *
+     * 기능:
+     * - 인스턴스가 없으면 새로 생성하고, 있으면 기존 인스턴스 반환
+     * - 메모리 효율성과 상태 유지를 위함
+     *
+     * @return HomePageView의 싱글톤 인스턴스
+     */
+    public static HomePageView getInstance() {
+        if (instance == null) {
+            instance = new HomePageView();
+        }
+        return instance;
+    }
+
     private final HomePageModel model;
     private final HomeImageView view;
+
+    // Controller는 View와 Model을 연결하는 역할만 하므로 필드로 유지
+    @SuppressWarnings("unused")
     private final HomePageController controller;
 
-    public HomePageView() {
+    // 싱글톤 패턴: private 생성자
+    private HomePageView() {
         // 이 패널 자체가 SidePanel의 우측 CENTER에 들어간다고 가정
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
@@ -98,9 +120,43 @@ public class HomePageView extends JPanel {
             imageLabel.add(nextButton, BorderLayout.EAST);
         }
 
+        /**
+         * 이미지를 패널 크기에 맞춰 비율을 유지하면서 스케일링하여 표시
+         * - 패널 크기: 760x600 (preferred size)
+         * - 이미지 비율을 유지하면서 패널에 맞게 조정
+         */
         public void setImageIcon(ImageIcon icon) {
             imageLabel.setText(null);
-            imageLabel.setIcon(icon);
+
+            if (icon == null || icon.getImage() == null) {
+                imageLabel.setIcon(null);
+                return;
+            }
+
+            // 원본 이미지 크기
+            int originalWidth = icon.getIconWidth();
+            int originalHeight = icon.getIconHeight();
+
+            // 패널 크기 (preferred size 기준)
+            int panelWidth = 760;
+            int panelHeight = 600;
+
+            // 비율을 유지하면서 패널에 맞게 스케일링
+            double widthRatio = (double) panelWidth / originalWidth;
+            double heightRatio = (double) panelHeight / originalHeight;
+            double scale = Math.min(widthRatio, heightRatio); // 비율 유지를 위해 더 작은 비율 사용
+
+            int scaledWidth = (int) (originalWidth * scale);
+            int scaledHeight = (int) (originalHeight * scale);
+
+            // 이미지 스케일링 (SCALE_SMOOTH: 부드러운 스케일링)
+            Image scaledImage = icon.getImage().getScaledInstance(
+                scaledWidth,
+                scaledHeight,
+                Image.SCALE_SMOOTH
+            );
+
+            imageLabel.setIcon(new ImageIcon(scaledImage));
         }
 
         public void setNoImageText(String text) {
@@ -165,22 +221,4 @@ public class HomePageView extends JPanel {
             g2.dispose();
         }
     }
-
-
-
-    // ======== 단독 테스트용 main (원하면 삭제해도 됨) ========
-
-    // public static void main(String[] args) {
-    //     SwingUtilities.invokeLater(() -> {
-    //         JFrame testFrame = new JFrame("홈 화면 테스트");
-    //         testFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    //         testFrame.setSize(760, 600);
-    //         testFrame.setLocationRelativeTo(null);
-
-    //         testFrame.setLayout(new BorderLayout());
-    //         testFrame.add(new HomePageView(), BorderLayout.CENTER);
-
-    //         testFrame.setVisible(true);
-    //     });
-    // }
 }

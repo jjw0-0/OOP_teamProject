@@ -14,6 +14,7 @@ import java.util.Locale;
  * 기능:
  * - 사용자의 개인 정보, 수강 중인 강의, 결제 내역을 표시하는 콘텐츠 패널
  * - SidePanel의 우측 콘텐츠 영역에 표시될 수 있는 재사용 가능한 컴포넌트
+ * - 싱글톤 패턴을 사용하여 애플리케이션 전체에서 하나의 인스턴스만 유지
  *
  * 핵심 내용:
  * - JPanel을 상속받아 SidePanel.showContent()로 쉽게 표시 가능
@@ -27,6 +28,25 @@ import java.util.Locale;
  * - 우측 그리드 (약 255px): 결제 내역
  */
 public class MyPageView extends JPanel {
+
+    // 싱글톤 패턴: private static 인스턴스 변수
+    private static MyPageView instance;
+
+    /**
+     * 싱글톤 인스턴스를 반환하는 메서드
+     *
+     * 기능:
+     * - 인스턴스가 없으면 새로 생성하고, 있으면 기존 인스턴스 반환
+     * - 메모리 효율성과 상태 유지를 위함
+     *
+     * @return MyPageView의 싱글톤 인스턴스
+     */
+    public static MyPageView getInstance() {
+        if (instance == null) {
+            instance = new MyPageView();
+        }
+        return instance;
+    }
 
     // ======================== 스타일 상수 ========================
 
@@ -150,7 +170,8 @@ public class MyPageView extends JPanel {
      * 2. GridLayout으로 3개의 열 생성
      * 3. 각 열에 프로필/일정, 강의 목록, 결제 내역 패널 추가
      */
-    public MyPageView() {
+    // 싱글톤 패턴: private 생성자
+    private MyPageView() {
         setLayout(new GridLayout(1, 3, StyleConstants.PADDING_SMALL, 0));
         setBackground(StyleConstants.BACKGROUND_COLOR);
         setBorder(new EmptyBorder(
@@ -606,7 +627,7 @@ public class MyPageView extends JPanel {
      * - 추후 실제 User Model이나 API 응답으로 교체 예정
      */
     private UserInfo getMockUserInfo() {
-        return new UserInfo("hong1234", "홍길동", "2005-03-15");
+        return new UserInfo("hong1234", "홍길동", "2008-01-01");
     }
 
     /**
@@ -617,8 +638,7 @@ public class MyPageView extends JPanel {
      * - 실제로는 사용자가 수강하는 강의의 요일 정보를 집계
      */
     private ScheduleInfo getMockScheduleInfo() {
-        // 월(2), 화(0), 수(1), 목(0), 금(3), 토(0), 일(0)
-        return new ScheduleInfo(new int[]{2, 0, 1, 0, 3, 0, 0});
+        return new ScheduleInfo(new int[]{2, 1, 2, 1, 2, 0, 0});
     }
 
     /**
@@ -630,12 +650,11 @@ public class MyPageView extends JPanel {
      */
     private List<LectureInfo> getMockLectures() {
         List<LectureInfo> lectures = new ArrayList<>();
-        lectures.add(new LectureInfo("수학 고급반", "월, 금"));
-        lectures.add(new LectureInfo("영어 독해 집중", "화, 목"));
-        lectures.add(new LectureInfo("국어 문법 특강", "수"));
-        lectures.add(new LectureInfo("과학 실험반", "금"));
-        lectures.add(new LectureInfo("사회 탐구 심화", "월"));
-        lectures.add(new LectureInfo("물리학 기초", "화"));
+        lectures.add(new LectureInfo("고등 수학 I", "월, 수"));
+        lectures.add(new LectureInfo("물리 기본 개념", "수, 금"));
+        lectures.add(new LectureInfo("한국사 입문", "월"));
+        lectures.add(new LectureInfo("문학 읽기 I", "화"));
+        lectures.add(new LectureInfo("수학 II", "목, 금"));
         return lectures;
     }
 
@@ -648,13 +667,15 @@ public class MyPageView extends JPanel {
      */
     private List<PaymentItem> getMockPayments() {
         List<PaymentItem> payments = new ArrayList<>();
-        payments.add(new PaymentItem("수학 고급반", -20000, "강의"));
-        payments.add(new PaymentItem("수학 고급 교재", -15000, "교재"));
-        payments.add(new PaymentItem("영어 독해 집중", -25000, "강의"));
-        payments.add(new PaymentItem("영어 독해 교재", -18000, "교재"));
-        payments.add(new PaymentItem("국어 문법 특강", -22000, "강의"));
-        payments.add(new PaymentItem("국어 문법 교재", -12000, "교재"));
-        payments.add(new PaymentItem("과학 실험반", -28000, "강의"));
+        payments.add(new PaymentItem("고등 수학 I", -150000, "강의"));
+        payments.add(new PaymentItem("수학의 정석", -25000, "교재"));
+        payments.add(new PaymentItem("영어 리딩 마스터", -22000, "교재"));
+        payments.add(new PaymentItem("물리 기본 개념", -140000, "강의"));
+        payments.add(new PaymentItem("한국사 입문", -120000, "강의"));
+        payments.add(new PaymentItem("한국사 바로알기", -15000, "교재"));
+        payments.add(new PaymentItem("문학 읽기 I", -135000, "강의"));
+        payments.add(new PaymentItem("현대문학 작품 읽기", -20000, "교재"));
+        payments.add(new PaymentItem("수학 II", -155000, "강의"));
         return payments;
     }
 }

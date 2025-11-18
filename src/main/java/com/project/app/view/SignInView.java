@@ -1,21 +1,51 @@
-package javaStudy;
+package com.project.app.view;
 
 import java.awt.*;
 import javax.swing.*;
+import com.project.app.service.SignInService;
 
-public class SignInFrame extends JFrame {
+/**
+ * 로그인 화면 뷰 (JPanel)
+ *
+ * 기능:
+ * - SidePanel 우측 콘텐츠 영역에 들어갈 "로그인" 화면
+ * - 사용자 ID/PW 입력 및 로그인 버튼 제공
+ * - 회원가입 버튼을 통한 화면 전환 기능 제공
+ * - 싱글톤 패턴을 사용하여 애플리케이션 전체에서 하나의 인스턴스만 유지
+ *
+ */
+public class SignInView extends JPanel {
+
+    // 싱글톤 패턴: private static 인스턴스 변수
+    private static SignInView instance;
+
+    /**
+     * 싱글톤 인스턴스를 반환하는 메서드
+     *
+     * 기능:
+     * - 인스턴스가 없으면 새로 생성하고, 있으면 기존 인스턴스 반환
+     * - 메모리 효율성과 상태 유지를 위함
+     *
+     * @return SignInView의 싱글톤 인스턴스
+     */
+    public static SignInView getInstance() {
+        if (instance == null) {
+            instance = new SignInView();
+        }
+        return instance;
+    }
 
     private JTextField idField;
     private JPasswordField pwField;
     private SignInService service;
 
-    public SignInFrame() {
-        super("ILTAGANGSA - Login");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(400, 500);
-        setLocationRelativeTo(null);
-
+    // 싱글톤 패턴: private 생성자
+    private SignInView() {
         service = new SignInService();
+
+        // JPanel 기본 설정 (기존 JFrame 크기와 유사하게 설정)
+        setPreferredSize(new Dimension(400, 500));
+        setLayout(new BorderLayout());
 
         JPanel root = new JPanel(new BorderLayout(10, 10));
         root.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
@@ -78,23 +108,34 @@ public class SignInFrame extends JFrame {
 
         pwField.addActionListener(e -> loginBtn.doClick());
         
+        // 회원가입 버튼 클릭 시 회원가입 화면으로 전환
         signupBtn.addActionListener(e -> {
-            //new SignupFrame().setVisible(true);
-            this.dispose();
+            SidePanel.getInstance().showContent(SignUpView.getInstance());
+            SidePanel.getInstance().setSelectedItem(SidePanel.MenuItem.SIGNUP);
         });
     }
 
+    /**
+     * 로그인 처리 메서드
+     *
+     * 동작 원리:
+     * 1. ID와 PW를 가져와 SignInService의 login 메서드 호출
+     * 2. 반환된 결과에 따라 적절한 메시지 표시
+     * 3. 로그인 성공 시 필드 초기화 (향후 메인 화면으로 전환 로직 추가 필요)
+     */
     private void handleLogin() {
         String id = idField.getText().trim();
         String pw = new String(pwField.getPassword());
-        
+
         String result = service.login(id, pw);
-        
+
         if (result.equals("SUCCESS")) {
             JOptionPane.showMessageDialog(this, "로그인 성공!\n환영합니다, " + id + "님!", "로그인 성공", JOptionPane.INFORMATION_MESSAGE);
             idField.setText("");
             pwField.setText("");
-            //new GangsaFrame().setVisible(true);
+            // 로그인 성공 후 홈 화면으로 전환
+            SidePanel.getInstance().showContent(HomePageView.getInstance());
+            SidePanel.getInstance().setSelectedItem(SidePanel.MenuItem.HOME);
         } else if (result.equals("EMPTY")) {
             JOptionPane.showMessageDialog(this, "ID와 PW를 입력하세요.", "오류", JOptionPane.WARNING_MESSAGE);
         } else if (result.equals("USER_NOT_FOUND")) {
@@ -104,9 +145,5 @@ public class SignInFrame extends JFrame {
             pwField.setText("");
             pwField.requestFocus();
         }
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new SignInFrame().setVisible(true));
     }
 }

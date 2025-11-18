@@ -1,8 +1,5 @@
-package main.java.com.project.app.model;
+package com.project.app.model;
 
-import javax.swing.*;
-import java.awt.*;
-import java.util.Arrays;
 import java.util.List;
 
 // ======== Model ========
