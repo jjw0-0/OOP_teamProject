@@ -133,7 +133,7 @@ public class InstructorsPageView extends JPanel {
 
     JPanel introPanel(InstructorData data) {
         JPanel introductionPanel = new JPanel();
-        introductionPanel.setMaximumSize(new Dimension(106, 46));
+        introductionPanel.setMaximumSize(new Dimension(120, 46));
         introductionPanel.setOpaque(false);
 
         JLabel introduction = new JLabel(" " + data.Introduction);
@@ -300,8 +300,8 @@ public class InstructorsPageView extends JPanel {
         }
 
         void setupInstructorDetailPopup(InstructorData data) {
-            JPanel popupPanel = new JPanel();
-            popupPanel.setLayout(new BoxLayout(popupPanel, BoxLayout.X_AXIS)); // 수평정렬
+            JPanel popupPanel = new JPanel(new BorderLayout(20, 0)); // 좌우 간격 20
+            popupPanel.setBorder(new EmptyBorder(20,20,20,20));
             popupPanel.setBackground(Color.WHITE);
             setContentPane(popupPanel);
 
@@ -309,13 +309,14 @@ public class InstructorsPageView extends JPanel {
             JPanel profileAndReview = new JPanel();
             profileAndReview.setLayout(new BoxLayout(profileAndReview, BoxLayout.Y_AXIS)); // 수직정렬
             profileAndReview.setAlignmentY(Component.TOP_ALIGNMENT);
-            profileAndReview.setMaximumSize(new Dimension(160, 460));
             profileAndReview.setOpaque(false);
 
             profileAndReview.add(setupProfile(data));
+            profileAndReview.add(Box.createVerticalStrut(10));
             profileAndReview.add(setupReviews(data));
+            profileAndReview.add(Box.createVerticalGlue());
 
-            popupPanel.add(profileAndReview);
+            popupPanel.add(profileAndReview,BorderLayout.WEST);
 
             // 강의목록
             JPanel wrapPanel = new JPanel();
@@ -348,7 +349,7 @@ public class InstructorsPageView extends JPanel {
             JScrollPane scrollPane = InstructorsPageView.createScrollPane(wrapLecturesPanel, 387, 284);
             wrapPanel.add(scrollPane);
 
-            popupPanel.add(wrapPanel);
+            popupPanel.add(wrapPanel,BorderLayout.CENTER);
         }
 
         JPanel createLecturePanel(InstructorData data, String lectureName) {
@@ -367,7 +368,8 @@ public class InstructorsPageView extends JPanel {
         JPanel setupProfile(InstructorData data) {
             JPanel profile = new JPanel();
             profile.setLayout(new BoxLayout(profile, BoxLayout.Y_AXIS));
-            profile.setMaximumSize(new Dimension(140, 180));
+            profile.setMaximumSize(new Dimension(160, 180));
+            profile.setPreferredSize(new Dimension(160,180));
             profile.setOpaque(false);
 
             JLabel imageLabel = InstructorsPageView.createImage(data, 138, 138);
@@ -391,28 +393,28 @@ public class InstructorsPageView extends JPanel {
         JPanel setupReviews(InstructorData data) {
             JPanel starRating = new JPanel();
             starRating.setOpaque(false);
-            starRating.setLayout(new BoxLayout(starRating, BoxLayout.Y_AXIS));
-            starRating.setMaximumSize(new Dimension(160, 250));
+            starRating.setLayout(new BorderLayout(0,3));
+            starRating.setMaximumSize(new Dimension(160, 280));
+            starRating.setPreferredSize(new Dimension(160, 280));
 
             JLabel reviewLabel = new JLabel("강의평");
             reviewLabel.setFont(new Font("맑은 고딕", Font.BOLD, 18));
             JPanel reviewPanel = new JPanel();
-            reviewPanel.setMaximumSize(new Dimension(150, 30));
+            reviewPanel.setMaximumSize(new Dimension(160, 30));
+            reviewPanel.setPreferredSize(new Dimension(160, 30));
             reviewPanel.setOpaque(false);
 
             reviewPanel.add(reviewLabel);
             reviewPanel.add(InstructorsPageView.createStar(data));
 
-            starRating.add(reviewPanel);
-            starRating.add(Box.createVerticalStrut(3));
+            starRating.add(reviewPanel,BorderLayout.NORTH); // 상단에 고정
+
 
             JPanel reviews = new JPanel();
             reviews.setLayout(new BoxLayout(reviews, BoxLayout.Y_AXIS));
             reviews.setBackground(new Color(0xEEEEEE));
-            reviews.setMaximumSize(new Dimension(140, 185));
-            reviews.add(Box.createVerticalGlue());
 
-            starRating.add(reviews);
+            starRating.add(reviews,BorderLayout.CENTER);
 
             return starRating;
         }
