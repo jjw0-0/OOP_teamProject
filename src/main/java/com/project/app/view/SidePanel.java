@@ -1,5 +1,10 @@
 package com.project.app.view;
 
+import com.project.app.controller.LectureController;
+import com.project.app.model.Lecture;
+import com.project.app.repository.LectureRepositoryImpl;
+import com.project.app.service.LectureService;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
@@ -628,11 +633,10 @@ public class SidePanel extends JFrame {
      */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            // SidePanel 인스턴스 생성 (싱글톤 패턴으로 자동으로 화면에 표시됨)
-            SidePanel.getInstance();
-            System.out.println("SidePanel 테스트 실행 중...");
-            System.out.println("좌측 메뉴를 클릭하여 콘텐츠 교체를 확인하세요.");
-            System.out.println("이제 모든 View가 실제로 연결되어 있습니다.");
+            SidePanel sidePanel = SidePanel.getInstance();
+            sidePanel.showContent(LecturePageView.getInstance());
+            sidePanel.setSelectedItem(SidePanel.MenuItem.LECTURE);
         });
+        }
     }
-}
+
