@@ -21,5 +21,30 @@ package com.project.app.dto;
  * 이유: 실패 원인이 다양함. 에러 타입별로 다른 안내 메시지 표시 필요.
  */
 public class EnrollLectureResponse {
+    private boolean success;
+    private String message; // 실패 시 에러타입 표기
+
+    EnrollLectureResponse(boolean success, String message){
+        this.success=success;
+        this.message=message;
+    }
+
+    // 신청 성공
+    public static EnrollLectureResponse success(){
+        return new EnrollLectureResponse(true, "강의 신청 성공");
+    }
+
+    // 신청 실패
+    public static EnrollLectureResponse failure(String message){
+        return new EnrollLectureResponse(false, message);
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public String getMessage() {
+        return message;
+    }
 
 }
