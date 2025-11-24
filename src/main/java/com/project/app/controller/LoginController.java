@@ -57,11 +57,20 @@ public class LoginController {
 
             // 3. 결과에 따른 처리
             if (response.isSuccess()) {
+                String gradeLabel = switch (response.getGrade()) {
+                    case 1 -> "고1";
+                    case 2 -> "고2";
+                    case 3 -> "고3";
+                    case 4 -> "N수";
+                    default -> "미지정";
+                };
+
                 String welcome = String.format(
-                        "로그인 성공!\n%s님 (%s학년), 환영합니다.",
+                        "로그인 성공!\n%s님 (%s), 환영합니다.",
                         response.getUserName(),
-                        response.getGrade()
+                        gradeLabel
                 );
+                
                 JOptionPane.showMessageDialog(
                         view,
                         welcome,
