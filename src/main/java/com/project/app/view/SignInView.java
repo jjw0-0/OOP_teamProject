@@ -33,76 +33,113 @@ public class SignInView extends JPanel {
     private JButton loginBtn;
     private JButton signupBtn;
 
+    // 폰트 상수
+    private static final Font TITLE_FONT = new Font("Inknut Antiqua", Font.BOLD, 24);
+    private static final Font EN_LABEL_FONT = new Font("Inknut Antiqua", Font.BOLD, 16);
+    private static final Font EN_INPUT_FONT = new Font("Inknut Antiqua", Font.PLAIN, 16);
+    private static final Font KO_BUTTON_FONT = new Font("맑은 고딕", Font.BOLD, 16);
+    private static final Font KO_SUB_FONT = new Font("맑은 고딕", Font.PLAIN, 14);
+
     // 싱글톤 패턴: private 생성자
     private SignInView() {
-        // JPanel 기본 설정
         setPreferredSize(new Dimension(400, 500));
         setLayout(new BorderLayout());
+        setBackground(Color.WHITE);
 
         JPanel root = new JPanel(new BorderLayout(10, 10));
-        root.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
-        add(root);
+        root.setBorder(BorderFactory.createEmptyBorder(48, 40, 30, 40));
+        root.setBackground(Color.WHITE);
+        add(root, BorderLayout.CENTER);
 
-        // 상단 타이틀
         JLabel title = new JLabel("ILTAGANGSA", SwingConstants.CENTER);
-        title.setFont(new Font("Serif", Font.BOLD, 36));
+        title.setFont(TITLE_FONT);
+        title.setBorder(BorderFactory.createEmptyBorder(0, 0, 70, 0));
+        title.setForeground(Color.BLACK);
         root.add(title, BorderLayout.NORTH);
 
-        // 중앙 폼 영역
-        JPanel form = new JPanel(new GridBagLayout());
-        root.add(form, BorderLayout.CENTER);
-        GridBagConstraints c = new GridBagConstraints();
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.insets = new Insets(8, 0, 8, 0);
+        JPanel center = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        center.setBackground(Color.WHITE);
+        root.add(center, BorderLayout.CENTER);
 
-        // ID 라벨 + 입력 필드
+        JPanel form = new JPanel(new GridBagLayout());
+        form.setBackground(Color.WHITE);
+        center.add(form);
+
+        GridBagConstraints c = new GridBagConstraints();
+        c.insets = new Insets(0, 0, 0, 0);
+        c.fill = GridBagConstraints.NONE;
+
         JLabel idLabel = new JLabel("ID");
-        idLabel.setFont(new Font("Dialog", Font.BOLD, 18));
+        idLabel.setFont(EN_LABEL_FONT);
+        idLabel.setForeground(Color.BLACK);
         c.gridx = 0;
         c.gridy = 0;
         c.anchor = GridBagConstraints.WEST;
+        c.weightx = 0;
+        c.insets = new Insets(8, 10, 19, 10); 
         form.add(idLabel, c);
 
         idField = new JTextField();
-        idField.setFont(new Font("Dialog", Font.PLAIN, 16));
-        idField.setPreferredSize(new Dimension(280, 35));
-        c.gridy = 1;
+        idField.setFont(EN_INPUT_FONT);
+        idField.setPreferredSize(new Dimension(180, 40));
+        c.gridx = 1;
+        c.gridy = 0;
+        c.weightx = 0;
+        c.fill = GridBagConstraints.NONE;
+        c.insets = new Insets(8, 0, 19, 10);
         form.add(idField, c);
 
-        // PW 라벨 + 입력 필드
         JLabel pwLabel = new JLabel("PW");
-        pwLabel.setFont(new Font("Dialog", Font.BOLD, 18));
-        c.gridy = 2;
-        c.insets = new Insets(20, 0, 8, 0);
+        pwLabel.setFont(EN_LABEL_FONT);
+        pwLabel.setForeground(Color.BLACK);
+        c.gridx = 0;
+        c.gridy = 1;
+        c.anchor = GridBagConstraints.WEST;
+        c.weightx = 0;
+        c.fill = GridBagConstraints.NONE;
+        c.insets = new Insets(19, 10, 8, 10);
         form.add(pwLabel, c);
 
         pwField = new JPasswordField();
-        pwField.setFont(new Font("Dialog", Font.PLAIN, 16));
-        pwField.setPreferredSize(new Dimension(280, 35));
-        c.gridy = 3;
-        c.insets = new Insets(8, 0, 8, 0);
+        pwField.setFont(EN_INPUT_FONT);
+        pwField.setPreferredSize(new Dimension(180, 40));
+        c.gridx = 1;
+        c.gridy = 1;
+        c.weightx = 0;
+        c.fill = GridBagConstraints.NONE;
+        c.insets = new Insets(19, 0, 8, 10);
         form.add(pwField, c);
 
-        // 하단 버튼 영역
         JPanel actions = new JPanel();
         actions.setLayout(new BoxLayout(actions, BoxLayout.Y_AXIS));
+        actions.setBackground(Color.WHITE);
+        actions.setBorder(BorderFactory.createEmptyBorder(0, 0, 45, 0)); 
         root.add(actions, BorderLayout.SOUTH);
 
         loginBtn = new JButton("로그인");
-        loginBtn.setFont(new Font("Dialog", Font.BOLD, 18));
-        loginBtn.setPreferredSize(new Dimension(280, 45));
-        loginBtn.setMaximumSize(new Dimension(280, 45));
+        loginBtn.setFont(KO_BUTTON_FONT);
+        loginBtn.setPreferredSize(new Dimension(250, 45));
+        loginBtn.setMaximumSize(new Dimension(250, 45));
         loginBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-        loginBtn.setBackground(Color.LIGHT_GRAY);
-        actions.add(loginBtn);
 
-        actions.add(Box.createVerticalStrut(15));
+        loginBtn.setBackground(new Color(3, 105, 161));
+        loginBtn.setForeground(Color.WHITE);
+        loginBtn.setOpaque(true);
+        loginBtn.setBorderPainted(false);
+        loginBtn.setFocusPainted(false);
+
+        actions.add(loginBtn);
+        actions.add(Box.createVerticalStrut(10));
 
         signupBtn = new JButton("회원가입");
-        signupBtn.setFont(new Font("Dialog", Font.PLAIN, 14));
+        signupBtn.setFont(KO_SUB_FONT);
         signupBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         signupBtn.setContentAreaFilled(false);
         signupBtn.setBorderPainted(false);
+        signupBtn.setFocusPainted(false);
+        signupBtn.setForeground(Color.BLACK);
+
+        actions.add(Box.createVerticalStrut(10));
         actions.add(signupBtn);
     }
 
