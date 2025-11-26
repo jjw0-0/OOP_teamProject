@@ -15,9 +15,35 @@ package com.project.app.dto;
  *     - INVALID_PASSWORD
  *     - DUPLICATE_ID
  *     - SYSTEM_ERROR
- *
- * 이유: 실패 원인을 명확히 전달. 에러 타입별로 다른 처리 가능.
  */
 public class RegisterResponse {
 
+    public enum ErrorType {
+        EMPTY_FIELD,
+        INVALID_PASSWORD,
+        DUPLICATE_ID,
+        SYSTEM_ERROR
+    }
+
+    private boolean success;
+    private String message;
+    private ErrorType errorType;
+
+    // 성공 시
+    public RegisterResponse(boolean success, String message) {
+        this.success = success;
+        this.message = message;
+        this.errorType = null;
+    }
+
+    // 실패 시
+    public RegisterResponse(boolean success, String message, ErrorType errorType) {
+        this.success = success;
+        this.message = message;
+        this.errorType = errorType;
+    }
+
+    public boolean isSuccess() { return success; }
+    public String getMessage() { return message; }
+    public ErrorType getErrorType() { return errorType; }
 }
