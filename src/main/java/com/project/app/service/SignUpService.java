@@ -3,6 +3,12 @@ package com.project.app.service;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
+import java.util.Calendar;
+
+import com.project.app.dto.RegisterRequest;
+import com.project.app.dto.RegisterResponse;
+import com.project.app.model.User;
+import com.project.app.repository.UserRepository;
 
 /**
  * 회원가입 비즈니스 로직을 처리하는 서비스 클래스
@@ -12,21 +18,14 @@ import java.io.*;
  * - users.txt 파일에 사용자 정보 저장
  * - 날짜 계산 유틸리티 제공 (윤년 처리 등)
  *
- * 주요 내용:
- * 1. handleSignUp: 모든 입력값 검증 후 파일에 저장
- * 2. isDuplicateId: users.txt를 읽어 ID 중복 확인
- * 3. getDaysInMonth: 월별 날짜 수 계산 (윤년 고려)
  */
 public class SignUpService {
 
-    /**
-     * 회원가입 처리 메서드
-     *
-     * @param parent 부모 컴포넌트 (메시지 다이얼로그 표시용, JPanel 또는 JFrame 모두 가능)
-     */
+    // 회원가입 처리 메서드
     public void handleSignUp(JTextField tfId, JPasswordField pfPw, JTextField tfName,
                              JComboBox<Integer> cbYear, JComboBox<Integer> cbMonth, JComboBox<Integer> cbDay,
                              Component parent) {
+
         String name = tfName.getText().trim();
         String id = tfId.getText().trim();
         String password = new String(pfPw.getPassword()).trim();
@@ -58,13 +57,19 @@ public class SignUpService {
         int day = (int) cbDay.getSelectedItem();
         String birth = String.format("%04d-%02d-%02d", year, month, day);
 
+        // ★ 생년월일 기준 학년 자동 계산
+        int grade = calculateGradeFromBirth(year, month, day);
+
+        // ★ users.txt 중복 체크
         if (isDuplicateId(id)) {
             JOptionPane.showMessageDialog(parent, "이미 존재하는 아이디입니다.", "중복 오류", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
+        // ★ users.txt 파일 저장 (쉼표 구분 + grade 추가)
+        //    형식: id,password,name,birth,grade
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("users.txt", true))) {
-            writer.write(id + "," + password + "," + name + "," + birth);
+            writer.write(id + "," + password + "," + name + "," + birth + "," + grade);
             writer.newLine();
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(parent, "회원정보 저장 중 오류가 발생했습니다.", "파일 오류", JOptionPane.ERROR_MESSAGE);
@@ -82,7 +87,8 @@ public class SignUpService {
                 String[] parts = line.split(",");
                 if (parts.length > 0 && parts[0].equals(id)) return true;
             }
-        } catch (IOException e) {}
+        } catch (IOException e) {
+        }
         return false;
     }
 
@@ -96,24 +102,12 @@ public class SignUpService {
     public int getDaysInMonth(int year, int month) {
         switch (month) {
             case 2: return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0) ? 29 : 28;
-            case 4: case 6: case 9: case 11: return 30;
+            case 4:
+            case 6:
+            case 9:
+            case 11: return 30;
             default: return 31;
         }
-    }
-
-    /**
-     * 취소 버튼 처리 메서드
-     *
-     * 주의: JPanel로 변환 후에는 dispose() 대신 화면 전환 로직이 필요합니다.
-     * 현재는 사용하지 않으며, 향후 SidePanel 전환 로직으로 대체될 예정입니다.
-     *
-     * @param component 부모 컴포넌트 (사용 안 함)
-     */
-    @Deprecated
-    public void handleCancel(Component component) {
-        // JPanel에서는 dispose() 불가능
-        // TODO: SidePanel로 이전 화면 전환 로직 구현 필요
-        // 예: SidePanel.getInstance().showContent(new SignInView());
     }
 
     private void clearFields(JTextField tfId, JPasswordField pfPw, JTextField tfName,
@@ -124,5 +118,19 @@ public class SignUpService {
         cbYear.setSelectedIndex(0);
         cbMonth.setSelectedIndex(0);
         cbDay.setSelectedIndex(0);
+    }
+
+    //생년월일을 기준으로 현재 학년(고1~고3 / N수)을 추정
+    private int calculateGradeFromBirth(int year, int month, int day) {
+        Calendar now = Calendar.getInstance();
+        int currentYear = now.get(Calendar.YEAR);
+
+        int diff = currentYear - year;
+
+        if (diff == 16) return 1; // 고1
+        if (diff == 17) return 2; // 고2
+        if (diff == 18) return 3; // 고3
+        if (diff >= 19) return 4; // N수
+        return 0; // 아직 고등학생이 아닌 경우
     }
 }
