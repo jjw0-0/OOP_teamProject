@@ -21,4 +21,62 @@ package com.project.app.dto;
  */
 public class MyLectureView {
 
+    private final int lectureId;
+    private final String lectureName;
+    private final String instructorName;
+    private final String subject;
+    private final String dayOfWeek;
+    private final String time;
+    private final String location;
+    private final String nextScheduleDate;
+
+    public MyLectureView(int lectureId,
+                         String lectureName,
+                         String instructorName,
+                         String subject,
+                         String dayOfWeek,
+                         String time,
+                         String location,
+                         String nextScheduleDate) {
+        this.lectureId = lectureId;
+        this.lectureName = lectureName;
+        this.instructorName = instructorName;
+        this.subject = subject;
+        this.dayOfWeek = dayOfWeek;
+        this.time = time;
+        this.location = location;
+        this.nextScheduleDate = nextScheduleDate;
+    }
+
+    public int getLectureId() {
+        return lectureId;
+    }
+
+    public String getLectureName() {
+        return lectureName;
+    }
+
+    public String getInstructorName() {
+        return instructorName;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public String getDayOfWeek() {
+        return dayOfWeek;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public String getNextScheduleDate() {
+        return nextScheduleDate;
+    }
 }
