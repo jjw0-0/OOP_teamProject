@@ -41,4 +41,11 @@ public class UserRepositoryImpl implements UserRepository {
         }
         store.put(user.getId(), user);
     }
+
+    public boolean checkEnrolled(String userId, String lecId) {
+        return true;
+    }
+
+    public void enrollLecture(String userId, String lecId) {
+    }
 }
