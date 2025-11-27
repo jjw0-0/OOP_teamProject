@@ -6,6 +6,9 @@ import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.project.app.controller.LoginController;
+import com.project.app.service.SignInService;
+
 /**
  * 메인 애플리케이션 프레임
  *
@@ -129,6 +132,9 @@ public class SidePanel extends JFrame {
     private Map<MenuItem, JButton> menuButtons;  // 메뉴 항목과 버튼 매핑
     private Map<MenuItem, ActionListener> menuListeners;  // 각 메뉴의 액션 리스너
 
+    // ✅ 로그인 화면용 컨트롤러 (한 번만 생성해서 재사용)
+    private LoginController loginController;
+
     // ======================== 생성자 ========================
 
     /**
@@ -150,6 +156,13 @@ public class SidePanel extends JFrame {
 
         initializeFrame();
         createUI();
+
+        // ✅ 여기서 LoginController를 한 번만 생성해서
+        //    SignInView와 SignInService를 연결해 둔다.
+        SignInView signInView = SignInView.getInstance();
+        SignInService signInService = new SignInService();
+        loginController = new LoginController(signInView, signInService);
+
         setupDefaultMenuListeners();  // 기본 메뉴 리스너 설정
         showContent(MyPageView.getInstance());  // 초기 콘텐츠: 마이페이지
         setVisible(true);
@@ -339,8 +352,11 @@ public class SidePanel extends JFrame {
 
         // 마이페이지
         setMenuListener(MenuItem.MYPAGE, e -> {
-            showContent(MyPageView.getInstance());
+            MyPageView myPage = MyPageView.getInstance();
+            myPage.refresh();
+            showContent(myPage);
         });
+
 
         // 도움말 (아직 미구현)
         setMenuListener(MenuItem.HELP, e -> {

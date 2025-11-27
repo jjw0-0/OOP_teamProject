@@ -42,6 +42,7 @@ public class SignInView extends JPanel {
 
     // 싱글톤 패턴: private 생성자
     private SignInView() {
+
         setPreferredSize(new Dimension(400, 500));
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
@@ -69,68 +70,66 @@ public class SignInView extends JPanel {
         c.insets = new Insets(0, 0, 0, 0);
         c.fill = GridBagConstraints.NONE;
 
+        // ID Label
         JLabel idLabel = new JLabel("ID");
         idLabel.setFont(EN_LABEL_FONT);
         idLabel.setForeground(Color.BLACK);
         c.gridx = 0;
         c.gridy = 0;
         c.anchor = GridBagConstraints.WEST;
-        c.weightx = 0;
-        c.insets = new Insets(8, 10, 19, 10); 
+        c.insets = new Insets(8, 10, 19, 10);
         form.add(idLabel, c);
 
+        // ID Field
         idField = new JTextField();
         idField.setFont(EN_INPUT_FONT);
         idField.setPreferredSize(new Dimension(180, 40));
         c.gridx = 1;
-        c.gridy = 0;
-        c.weightx = 0;
-        c.fill = GridBagConstraints.NONE;
+        c.gridx = 1;
         c.insets = new Insets(8, 0, 19, 10);
         form.add(idField, c);
 
+        // PW Label
         JLabel pwLabel = new JLabel("PW");
         pwLabel.setFont(EN_LABEL_FONT);
         pwLabel.setForeground(Color.BLACK);
         c.gridx = 0;
         c.gridy = 1;
-        c.anchor = GridBagConstraints.WEST;
-        c.weightx = 0;
-        c.fill = GridBagConstraints.NONE;
         c.insets = new Insets(19, 10, 8, 10);
         form.add(pwLabel, c);
 
+        // PW Field
         pwField = new JPasswordField();
         pwField.setFont(EN_INPUT_FONT);
         pwField.setPreferredSize(new Dimension(180, 40));
         c.gridx = 1;
         c.gridy = 1;
-        c.weightx = 0;
-        c.fill = GridBagConstraints.NONE;
         c.insets = new Insets(19, 0, 8, 10);
         form.add(pwField, c);
 
+        // Buttons
         JPanel actions = new JPanel();
         actions.setLayout(new BoxLayout(actions, BoxLayout.Y_AXIS));
         actions.setBackground(Color.WHITE);
-        actions.setBorder(BorderFactory.createEmptyBorder(0, 0, 45, 0)); 
+        actions.setBorder(BorderFactory.createEmptyBorder(0, 0, 45, 0));
         root.add(actions, BorderLayout.SOUTH);
 
+        // 로그인 버튼
         loginBtn = new JButton("로그인");
         loginBtn.setFont(KO_BUTTON_FONT);
         loginBtn.setPreferredSize(new Dimension(250, 45));
         loginBtn.setMaximumSize(new Dimension(250, 45));
         loginBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-
         loginBtn.setBackground(new Color(3, 105, 161));
         loginBtn.setForeground(Color.WHITE);
         loginBtn.setOpaque(true);
         loginBtn.setBorderPainted(false);
         loginBtn.setFocusPainted(false);
-
         actions.add(loginBtn);
+
         actions.add(Box.createVerticalStrut(10));
 
+        // 회원가입 버튼
         signupBtn = new JButton("회원가입");
         signupBtn.setFont(KO_SUB_FONT);
         signupBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -143,35 +142,25 @@ public class SignInView extends JPanel {
         actions.add(signupBtn);
     }
 
-    /**
-     * Controller가 로그인 버튼 이벤트를 등록하기 위한 메서드
-     */
+    /** Controller가 로그인 버튼 이벤트를 등록하기 위한 메서드 */
     public void addLoginListener(ActionListener listener) {
         loginBtn.addActionListener(listener);
-        // 비밀번호 필드에서 엔터 눌러도 로그인 되게
-        pwField.addActionListener(listener);
+        pwField.addActionListener(listener); // 엔터키 지원
     }
 
-    /**
-     * Controller가 "회원가입" 버튼 클릭 이벤트를 등록하기 위한 메서드
-     */
+    /** Controller가 "회원가입" 버튼 이벤트 등록하기 위한 메서드 */
     public void addGoToSignUpListener(ActionListener listener) {
         signupBtn.addActionListener(listener);
     }
 
-    /**
-     * 현재 View의 입력값을 기반으로 LoginRequest DTO를 생성
-     * Controller → Service로 넘길 때 사용
-     */
+    /** 입력값 기반 DTO 생성 */
     public LoginRequest getLoginInput() {
         String id = idField.getText().trim();
         String pw = new String(pwField.getPassword()).trim();
         return new LoginRequest(id, pw);
     }
 
-    /**
-     * 로그인 성공 후 입력 필드 초기화할 때 사용
-     */
+    /** 로그인 후 입력 초기화 */
     public void clearFields() {
         idField.setText("");
         pwField.setText("");
