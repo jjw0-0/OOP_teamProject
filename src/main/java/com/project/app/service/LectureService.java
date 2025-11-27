@@ -93,12 +93,22 @@ public class LectureService{
      * 학년별 강의 필터링
      *
      * @param lectures 강의 목록
-     * @param grade 학년
+     * @param grade    학년
      * @return 해당 학년의 강의만 포함된 리스트
      */
     private List<Lecture> filterByGrade(List<Lecture> lectures, String grade) {
         return lectures.stream()
-                .filter(lecture -> lecture.getGrade().equals(grade))
+                .filter(lecture -> {
+                    String lectureGrade = lecture.getGrade();
+
+                    // "고3/N수" 버튼 클릭 시 -> "고3" 또는 "N수" 포함된 강의 필터링
+                    if (grade.equals("고3/N수")) {
+                        return lectureGrade.contains("고3") || lectureGrade.contains("N수");
+                    }
+
+                    // 일반 학년 필터링 (고1, 고2 등) - 포함 여부로 검색
+                    return lectureGrade.contains(grade);
+                })
                 .collect(Collectors.toList());
     }
 

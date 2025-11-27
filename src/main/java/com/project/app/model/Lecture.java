@@ -37,9 +37,9 @@ public class Lecture {
     // 전체 필드 생성자
     public Lecture(String lectureId, String academy, String subject, int year,
                    String title, String instructor, String textbook,
-                   int lecturePrice, int textbookPrice, String description,
-                   String targetGrade, int plan, int capacity,
-                   String dayOfWeek, String time, double rating) {
+                   int lecturePrice, int textbookPrice,String location, String description,
+                   String targetGrade, double rating, int currentEnrolled, int capacity,  // 순서 변경
+                   String dayOfWeek, String time,String thumbnailPath) {
         this();
         this.lectureId = lectureId;
         this.academy = academy;
@@ -50,13 +50,17 @@ public class Lecture {
         this.textbook = textbook;
         this.lecturePrice = lecturePrice;
         this.textbookPrice = textbookPrice;
+        this.location = location;
         this.description = description;
         this.targetGrade = targetGrade;
-        this.plan = plan;
+        this.rating = rating;
+        this.plan = 0;
+        this.currentEnrolled=currentEnrolled;
         this.capacity = capacity;
         this.dayOfWeek = dayOfWeek;
         this.time = time;
-        this.rating = rating;
+        this.thumbnailPath = thumbnailPath;
+
     }
 
     // Getter & Setter

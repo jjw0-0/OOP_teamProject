@@ -39,21 +39,39 @@ public class LectureRepositoryImpl {
             String[] parts = line.split("/");
             System.out.println("[Repository] 줄 " + lineCount + " - 필드 개수: " + parts.length);
 
-            if (parts.length < 16) {
-                System.out.println("[Repository] 줄 " + lineCount + " 스킵 - 필드 부족");
+            // 필드 개수 체크 (17개 또는 18개 허용)
+            if (parts.length < 17) {
+                System.out.println("[Repository] 줄 " + lineCount + " 스킵 - 필드 부족 (필드: " + parts.length + "개)");
                 continue;
             }
 
             try {
+                // 이미지 경로 처리 (18번째 필드가 있을 때만)
+                String thumbnailPath = "";
+                if (parts.length >= 18 && !parts[17].trim().isEmpty()) {
+                    String thumbnailFileName = parts[17].trim();
+                    thumbnailPath = "src/main/resources/LectureImages/" + thumbnailFileName;
+                }
+
                 Lecture lecture = new Lecture(
-                        parts[0].trim(), parts[1].trim(), parts[2].trim(),
-                        Integer.parseInt(parts[3].trim()), parts[4].trim(),
-                        parts[5].trim(), parts[6].trim(),
-                        Integer.parseInt(parts[7].trim()),
-                        Integer.parseInt(parts[8].trim()), parts[9].trim(),
-                        parts[10].trim(), Integer.parseInt(parts[11].trim()),
-                        Integer.parseInt(parts[12].trim()), parts[13].trim(),
-                        parts[14].trim(), Double.parseDouble(parts[15].trim())
+                        parts[0].trim(),   // lectureId
+                        parts[1].trim(),   // academy
+                        parts[2].trim(),   // subject
+                        Integer.parseInt(parts[3].trim()),   // year
+                        parts[4].trim(),   // title
+                        parts[5].trim(),   // instructor
+                        parts[6].trim(),   // textbook
+                        Integer.parseInt(parts[7].trim()),   // lecturePrice
+                        Integer.parseInt(parts[8].trim()),   // textbookPrice
+                        parts[9].trim(),   // location
+                        parts[10].trim(),  // description
+                        parts[11].trim(),  // targetGrade
+                        Double.parseDouble(parts[12].trim()),  // rating
+                        Integer.parseInt(parts[13].trim()),    // currentEnrolled
+                        Integer.parseInt(parts[14].trim()),    // capacity
+                        parts[15].trim(),  // dayOfWeek
+                        parts[16].trim(),  // time
+                        thumbnailPath      // 빈 문자열 또는 이미지 경로
                 );
                 lectureList.add(lecture);
                 System.out.println("[Repository] 줄 " + lineCount + " 로드 완료: " + parts[0]);

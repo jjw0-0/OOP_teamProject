@@ -10,7 +10,8 @@ public class LectureDetailView {
     private String courseName;
     private String instructor;
     private double rating;
-    private String schedule;
+    private String dayOfWeek;
+    private String time;
     private String location;
     private String textbook;
     private int textbookPrice;
@@ -18,18 +19,16 @@ public class LectureDetailView {
     private int currentEnrolled; // 현재 인원
     private int capacity; // 최대 정원
     private String priorityGrade; // 우선 학년
+    private String thumbnailPath; // 이미지 경로
 
-    // 기본 생성자 (테스트용 더미 데이터)
-    public LectureDetailView() {
-        this("기초 확률과 통계","홍길동",3.0,"월요일","경기도 수원시 영통구 광교산로 154-42","기초 확률과 통계",16000,"기본 문장 구조부터 6줄 이상의 긴 문장까지 단계적으로 해석", 16,25,"고2");
-    }
 
     // 매개변수 생성자 (실제 데이터 전달)
-    public LectureDetailView(String courseName, String instructor, double rating,String schedule , String location,String textbook, int textbookPrice, String courseInstroduction, int currentEnrolled, int capacity, String priorityGrade) {
+    public LectureDetailView(String courseName, String instructor, double rating,String dayOfWeek,String time, String location,String textbook, int textbookPrice, String courseInstroduction, int currentEnrolled, int capacity, String priorityGrade, String thumbnailPath) {
         this.courseName = courseName;
         this.instructor = instructor;
         this.rating = rating;
-        this.schedule = schedule;
+        this.dayOfWeek = dayOfWeek;
+        this.time=time;
         this.location = location;
         this.textbook = textbook;
         this.textbookPrice = textbookPrice;
@@ -37,6 +36,7 @@ public class LectureDetailView {
         this.currentEnrolled=currentEnrolled;
         this.capacity=capacity;
         this.priorityGrade=priorityGrade;
+        this.thumbnailPath=thumbnailPath;
     }
 
     // 다이얼로그 표시
@@ -83,17 +83,40 @@ public class LectureDetailView {
         profileImage.setBounds(15,80,140,150);
         profileImage.setBackground(Color.WHITE);
         profileImage.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        profileImage.setLayout(new BorderLayout());
         contentPanel.add(profileImage);
+
+        // 이미지 로드
+        if (thumbnailPath != null && !thumbnailPath.isEmpty()) {
+            java.io.File imgFile = new java.io.File(thumbnailPath);
+            if (imgFile.exists()) {  // ← 파일 존재 체크
+                try {
+                    ImageIcon icon = new ImageIcon(thumbnailPath);
+                    Image img = icon.getImage().getScaledInstance(140, 150, Image.SCALE_SMOOTH);
+                    JLabel imgLabel = new JLabel(new ImageIcon(img));
+                    imgLabel.setHorizontalAlignment(SwingConstants.CENTER);
+                    profileImage.add(imgLabel, BorderLayout.CENTER);
+                } catch (Exception e) {
+                    System.err.println("이미지 로드 실패: " + thumbnailPath);
+                    addNoImageLabel(profileImage);
+                }
+            } else {
+                System.err.println("이미지 파일 없음: " + thumbnailPath);
+                addNoImageLabel(profileImage);
+            }
+        } else {
+            addNoImageLabel(profileImage);
+        }
 
         // 강의명
         JLabel titleLabel = new JLabel(courseName);
-        titleLabel.setBounds(170,70,250,40);
-        titleLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 24));
+        titleLabel.setBounds(170,70,300,40);
+        titleLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 18));
         contentPanel.add(titleLabel);
 
         //별점
         JPanel starPanel = new JPanel(new FlowLayout(FlowLayout.LEFT,3,0));
-        starPanel.setBounds(400,80,200,30);
+        starPanel.setBounds(470,80,200,30);
         starPanel.setBackground(Color.WHITE);
 
         int starCount = (int) rating;
@@ -117,7 +140,7 @@ public class LectureDetailView {
 
         // 교재
         JLabel textbookLabel = new JLabel("교재: " + textbook);
-        textbookLabel.setBounds(330,120, 200, 25);
+        textbookLabel.setBounds(300,120, 330, 25);
         textbookLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 15));
         contentPanel.add(textbookLabel);
 
@@ -129,7 +152,7 @@ public class LectureDetailView {
 
         // ===== 교재 구매 버튼 =====
         JButton buyBtn = new JButton("교재 구매");
-        buyBtn.setBounds(510, 130, 90, 30);
+        buyBtn.setBounds(510, 160, 90, 30);
         buyBtn.setFont(new Font("Malgun Gothic", Font.BOLD, 12));
         buyBtn.setBackground(Color.WHITE);
         buyBtn.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
@@ -146,14 +169,14 @@ public class LectureDetailView {
         contentPanel.add(enrollmentLabel);
 
         // 스케쥴
-        JLabel scheduleLabel = new JLabel("시간 : 매주 " + schedule);
+        JLabel scheduleLabel = new JLabel("시간 : 매주 " + dayOfWeek+" "+time+"시");
         scheduleLabel.setBounds(170,180, 150, 25);
         scheduleLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 15));
         contentPanel.add(scheduleLabel);
 
         //우선 학년
         JLabel gradeLabel=new JLabel("학년 : "+priorityGrade);
-        gradeLabel.setBounds(330,178,150,25);
+        gradeLabel.setBounds(350,178,150,25);
         gradeLabel.setFont(new Font("Malgun Gothic",Font.BOLD,15));
         contentPanel.add(gradeLabel);
 
@@ -174,7 +197,7 @@ public class LectureDetailView {
 
         // "〈강의 설명〉" 패널
         JLabel descTitle = new JLabel("〈강의 설명〉");
-        descTitle.setBounds(35,250, 100, 25);
+        descTitle.setBounds(35,240, 100, 25);
         descTitle.setFont(new Font("Malgun Gothic", Font.BOLD, 15));
         contentPanel.add(descTitle);
 
@@ -183,7 +206,7 @@ public class LectureDetailView {
         descIntro.setLineWrap(true); // 자동 줄바꿈
         descIntro.setWrapStyleWord(false); // 단어 단위 줄바꿈
         descIntro.setEditable(false);
-        descIntro.setBounds(135, 252, 565, 25);
+        descIntro.setBounds(135, 242, 500, 50);
         descIntro.setFont(new Font("Malgun Gothic", Font.BOLD, 15));
         contentPanel.add(descIntro);
 
@@ -392,5 +415,18 @@ public class LectureDetailView {
 
         successDialog.add(panel);
         successDialog.setVisible(true);
+    }
+    /**
+     * 이미지 없을 때 기본 라벨 표시
+     */
+    private void addNoImageLabel(JPanel panel) {
+        // 패널 배경색을 썸네일과 동일하게
+        panel.setBackground(new Color(240, 240, 240));
+
+        JLabel noImage = new JLabel("No Image");
+        noImage.setHorizontalAlignment(SwingConstants.CENTER);
+        noImage.setFont(new Font("Malgun Gothic", Font.PLAIN, 12));
+        noImage.setForeground(new Color(150, 150, 150));  // ← 썸네일과 동일한 회색
+        panel.add(noImage, BorderLayout.CENTER);
     }
 }

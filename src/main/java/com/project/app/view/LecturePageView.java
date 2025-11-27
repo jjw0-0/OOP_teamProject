@@ -3,6 +3,7 @@ package com.project.app.view;
 import javax.swing.*;
 
 import com.project.app.controller.LectureController;
+import com.project.app.controller.LectureDetailController;
 import com.project.app.model.Lecture;
 import com.project.app.repository.LectureRepositoryImpl;
 import com.project.app.service.LectureService;
@@ -36,10 +37,9 @@ public class LecturePageView extends JPanel {
     private JButton searchBtn;
     private JPanel gridPanel;
 
-
-
     // 이벤트 리스너
     private LectureCardClickListener cardClickListener;
+
     /**
      * 싱글톤 인스턴스를 반환하는 메서드
      *
@@ -75,7 +75,6 @@ public class LecturePageView extends JPanel {
         String filePath = System.getProperty("user.dir") + "\\src\\main\\data\\LectureData.txt";
         System.out.println("파일 경로: " + filePath);
 
-
         LectureRepositoryImpl repository = new LectureRepositoryImpl();
         repository.loadLecturesFromFile(filePath);
 
@@ -109,8 +108,7 @@ public class LecturePageView extends JPanel {
         return contentPanel;
     }
 
-    private void addSubjectButtons(JPanel parent){
-
+    private void addSubjectButtons(JPanel parent) {
         // 상단 과목 버튼
         String[] subjects = { "국어", "수학", "영어", "사회", "과학", "한국사", "모의고사" };
         int btnWidth = 90;
@@ -121,60 +119,78 @@ public class LecturePageView extends JPanel {
 
         for (int i = 0; i < subjects.length; i++) {
             int x = startX + i * (btnWidth + btnGap);
+            String subject = subjects[i];
 
-            JButton subjectBtn = new JButton(subjects[i]);
+            JButton subjectBtn = new JButton(subject) {
+                @Override
+                protected void paintComponent(Graphics g) {
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                    // 배경 그리기
+                    if (getModel().isPressed()) {
+                        g2.setColor(new Color(225, 238, 252));
+                    } else if (getModel().isRollover()) {
+                        g2.setColor(new Color(245, 248, 252));
+                    } else {
+                        g2.setColor(getBackground());
+                    }
+                    g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+
+                    // 테두리 그리기
+                    g2.setColor(new Color(30, 110, 160));
+                    g2.setStroke(new BasicStroke(1));
+                    g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+
+                    g2.dispose();
+
+                    // 텍스트 그리기
+                    super.paintComponent(g);
+                }
+            };
+
             subjectBtn.setBounds(x, startY, btnWidth, btnHeight);
             subjectBtn.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
             subjectBtn.setForeground(Color.BLACK);
             subjectBtn.setBackground(Color.WHITE);
             subjectBtn.setFocusPainted(false);
-            subjectBtn.setBorder(BorderFactory.createLineBorder(new Color(30, 110, 160)));
+            subjectBtn.setBorderPainted(false);
             subjectBtn.setContentAreaFilled(false);
+            subjectBtn.setOpaque(false);
             subjectBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-            // 호버 효과
-            subjectBtn.addMouseListener(new MouseAdapter() {
-                public void mouseEntered(MouseEvent e) {
-                    subjectBtn.setBackground(new Color(245, 248, 252));
-                }
-                public void mouseExited(MouseEvent e) {
-                    subjectBtn.setBackground(Color.WHITE);
-                }
-            });
-            subjectButtons.put(subjects[i], subjectBtn);
+            subjectButtons.put(subject, subjectBtn);
             parent.add(subjectBtn);
         }
-
     }
 
     private void addSearchArea(JPanel parent) {
         // 검색창
         searchField = new JTextField();
-        searchField.setBounds(505,120,160,30);
+        searchField.setBounds(505, 120, 160, 30);
         searchField.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
         searchField.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(30, 110, 160), 2),
-                BorderFactory.createEmptyBorder(5, 15, 5, 75)
-        ));
+                BorderFactory.createEmptyBorder(5, 15, 5, 75)));
         parent.add(searchField);
 
         // 검색 버튼
         searchBtn = new JButton("검색");
-        searchBtn.setBounds(665,120,60,30);
+        searchBtn.setBounds(665, 120, 60, 30);
         searchBtn.setFont(new Font("Malgun Gothic", Font.BOLD, 12));
         searchBtn.setForeground(Color.WHITE); // 검색글씨
-        searchBtn.setBackground(new Color(30,110,160));
+        searchBtn.setBackground(new Color(30, 110, 160));
         searchBtn.setOpaque(true);
         searchBtn.setContentAreaFilled(true);
         searchBtn.setBorderPainted(false);
         searchBtn.setFocusPainted(false);
         searchBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-
         searchBtn.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
                 searchBtn.setBackground(new Color(25, 95, 135));
             }
+
             public void mouseExited(MouseEvent e) {
                 searchBtn.setBackground(new Color(30, 110, 160));
             }
@@ -183,6 +199,7 @@ public class LecturePageView extends JPanel {
         parent.add(searchBtn);
 
     }
+
     private void addSortAndAcademy(JPanel parent) {
         // 정렬 라벨
         JLabel sortLabel = new JLabel("정렬");
@@ -190,8 +207,7 @@ public class LecturePageView extends JPanel {
         sortLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
         parent.add(sortLabel);
 
-
-        String[] sortOptions = {"최신순", "인기순", "평점순"};
+        String[] sortOptions = { "최신순", "인기순", "평점순" };
         sortCombo = new JComboBox<>(sortOptions);
         sortCombo.setBounds(80, 120, 100, 30);
         sortCombo.setFont(new Font("Malgun Gothic", Font.PLAIN, 12));
@@ -203,7 +219,7 @@ public class LecturePageView extends JPanel {
         academyLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
         parent.add(academyLabel);
 
-        String[] academyOptions={"전체","메가스터디","이투스","대성마이맥"};
+        String[] academyOptions = { "전체", "메가스터디", "이투스", "대성마이맥" };
         academyCombo = new JComboBox<>(academyOptions);
         academyCombo.setBounds(250, 120, 120, 30);
         academyCombo.setFont(new Font("Malgun Gothic", Font.PLAIN, 12));
@@ -216,9 +232,10 @@ public class LecturePageView extends JPanel {
         });
         parent.add(academyCombo);
     }
+
     // 학년 선택 버튼
     private void addGradeButtons(JPanel parent) {
-        String[] grades = {"고1", "고2", "고3/N수"};
+        String[] grades = { "고1", "고2", "고3/N수" };
         int btnWidth = 70;
         int btnHeight = 35;
         int startX = 40;
@@ -246,6 +263,7 @@ public class LecturePageView extends JPanel {
                         gradeBtn.setBackground(new Color(245, 248, 252));
                     }
                 }
+
                 public void mouseExited(MouseEvent e) {
                     if (!gradeBtn.getBackground().equals(new Color(30, 110, 160))) {
                         gradeBtn.setBackground(Color.WHITE);
@@ -258,7 +276,7 @@ public class LecturePageView extends JPanel {
     }
 
     // 강의 카드 그리드 패널 생성
-    private JScrollPane lectureScroll;  // ← 필드 추가
+    private JScrollPane lectureScroll; // ← 필드 추가
 
     private void createLectureGrid(JPanel parent) {
         gridPanel = new JPanel();
@@ -266,6 +284,14 @@ public class LecturePageView extends JPanel {
         gridPanel.setBackground(Color.WHITE);
         gridPanel.setBounds(30, 240, 700, 2000);
         parent.add(gridPanel);
+    }
+
+    // 썸네일이 없을 경우 기본 이미지
+    private void addDefaultThumbnail(JPanel thumbnail) {
+        JLabel thumbText = new JLabel("썸네일", JLabel.CENTER);
+        thumbText.setFont(new Font("Malgun Gothic", Font.PLAIN, 12));
+        thumbText.setForeground(new Color(150, 150, 150));
+        thumbnail.add(thumbText, BorderLayout.CENTER);
     }
 
     // 강의 카드 생성
@@ -287,12 +313,34 @@ public class LecturePageView extends JPanel {
         thumbnail.setBounds(10, 10, width - 20, 100);
         thumbnail.setBackground(new Color(240, 240, 240));
         thumbnail.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
-
-        JLabel thumbText = new JLabel("썸네일", JLabel.CENTER);
-        thumbText.setFont(new Font("Malgun Gothic", Font.PLAIN, 12));
-        thumbText.setForeground(new Color(150, 150, 150));
-        thumbnail.add(thumbText);
+        thumbnail.setLayout(new BorderLayout());
         card.add(thumbnail);
+
+
+        // 이미지 로드
+        String thumbnailPath = lecture.getThumbnailPath();
+        if (thumbnailPath != null && !thumbnailPath.isEmpty()) {
+            java.io.File imgFile = new java.io.File(thumbnailPath);
+            if (imgFile.exists()) {  // ← 파일 존재 체크 필수!
+                try {
+                    ImageIcon icon = new ImageIcon(thumbnailPath);
+                    Image img = icon.getImage().getScaledInstance(width - 20, 100, Image.SCALE_SMOOTH);
+                    JLabel imgLabel = new JLabel(new ImageIcon(img));
+                    imgLabel.setHorizontalAlignment(SwingConstants.CENTER);
+                    thumbnail.add(imgLabel, BorderLayout.CENTER);
+                } catch (Exception e) {
+                    System.err.println("썸네일 로드 실패: " + thumbnailPath);
+                    addDefaultThumbnail(thumbnail);
+                }
+            } else {
+                // 파일이 존재하지 않을 때
+                System.err.println("썸네일 파일 없음: " + thumbnailPath);
+                addDefaultThumbnail(thumbnail);
+            }
+        } else {
+            // 경로가 null이거나 비어있을 때
+            addDefaultThumbnail(thumbnail);
+        }
 
         // 강의명
         String shortTitle = lecture.getTitle().length() > 15
@@ -307,8 +355,7 @@ public class LecturePageView extends JPanel {
         String ratingHtml = String.format(
                 "<html><span style='color:#FFD700; font-size:14px;'>★</span> " +
                         "<span style='font-size:12px;'>%.1f</span></html>",
-                lecture.getRating()
-        );
+                lecture.getRating());
         JLabel ratingLabel = new JLabel(ratingHtml);
         ratingLabel.setBounds(15, 145, width - 20, 20);
         card.add(ratingLabel);
@@ -318,9 +365,11 @@ public class LecturePageView extends JPanel {
             public void mouseEntered(MouseEvent e) {
                 card.setBackground(new Color(245, 250, 255));
             }
+
             public void mouseExited(MouseEvent e) {
                 card.setBackground(Color.WHITE);
             }
+
             public void mouseClicked(MouseEvent e) {
                 // Controller에 이벤트 전달
                 if (cardClickListener != null) {
@@ -332,8 +381,7 @@ public class LecturePageView extends JPanel {
         return card;
     }
 
-
-// ========== Controller 연동 메서드 ==========
+    // ========== Controller 연동 메서드 ==========
 
     /**
      * 과목 버튼에 리스너 등록
@@ -448,14 +496,21 @@ public class LecturePageView extends JPanel {
                 lecture.getInstructor(),
                 lecture.getRating(),
                 lecture.getDayOfWeek(),
+                lecture.getTime(),
                 lecture.getLocation(),
                 lecture.getTextbook(),
                 lecture.getTextbookPrice(),
                 lecture.getDescription(),
                 lecture.getCurrentEnrolled(),
                 lecture.getCapacity(),
-                lecture.getGrade()
-        );
+                lecture.getGrade(),
+                lecture.getThumbnailPath());
+
+        // Controller 생성 및 연결 추가
+        LectureService lectureService = new LectureService(/* repository 전달 필요 */);
+        String currentUserId = "testUser";  // 실제로는 로그인된 사용자 ID
+        new LectureDetailController(detail, lectureService, currentUserId, lecture.getLectureId());
+
         detail.show();
     }
 
@@ -496,5 +551,44 @@ public class LecturePageView extends JPanel {
     @FunctionalInterface
     public interface LectureCardClickListener {
         void onCardClick(String lectureId);
+    }
+
+    // ========== 내부 클래스: RoundedPanel ==========
+    static class RoundedPanel extends JPanel {
+        int radius;
+        int borderWidth;
+        Color borderColor;
+
+        RoundedPanel(int radius) {
+            this.radius = radius;
+            this.borderWidth = 0;
+            this.borderColor = null;
+            setOpaque(false);
+        }
+
+        RoundedPanel(int radius, int borderWidth, Color borderColor) {
+            this.radius = radius;
+            this.borderWidth = borderWidth;
+            this.borderColor = borderColor;
+            setOpaque(false);
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            super.paintComponent(g2);
+
+            g2.setColor(getBackground());
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius, radius);
+
+            if (borderColor != null) {
+                g2.setColor(borderColor);
+                g2.setStroke(new BasicStroke(borderWidth));
+                g2.drawRoundRect(borderWidth / 2, borderWidth / 2, getWidth() - borderWidth,
+                        getHeight() - borderWidth, radius, radius);
+            }
+        }
     }
 }
