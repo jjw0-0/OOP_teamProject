@@ -31,6 +31,8 @@ public class LecturePageView extends JPanel {
     // UI 컴포넌트들
     private Map<String, JButton> subjectButtons = new HashMap<>();
     private Map<String, JButton> gradeButtons = new HashMap<>();
+    private JButton selectedSubjectButton = null;
+    private JButton selectedGradeButton = null;
     private JComboBox<String> sortCombo;
     private JComboBox<String> academyCombo;
     private JTextField searchField;
@@ -276,7 +278,7 @@ public class LecturePageView extends JPanel {
     }
 
     // 강의 카드 그리드 패널 생성
-    private JScrollPane lectureScroll; // ← 필드 추가
+    private JScrollPane lectureScroll;
 
     private void createLectureGrid(JPanel parent) {
         gridPanel = new JPanel();
@@ -316,12 +318,11 @@ public class LecturePageView extends JPanel {
         thumbnail.setLayout(new BorderLayout());
         card.add(thumbnail);
 
-
         // 이미지 로드
         String thumbnailPath = lecture.getThumbnailPath();
         if (thumbnailPath != null && !thumbnailPath.isEmpty()) {
             java.io.File imgFile = new java.io.File(thumbnailPath);
-            if (imgFile.exists()) {  // ← 파일 존재 체크 필수!
+            if (imgFile.exists()) { // ← 파일 존재 체크 필수!
                 try {
                     ImageIcon icon = new ImageIcon(thumbnailPath);
                     Image img = icon.getImage().getScaledInstance(width - 20, 100, Image.SCALE_SMOOTH);
@@ -389,7 +390,19 @@ public class LecturePageView extends JPanel {
     public void addSubjectButtonListener(String subject, ActionListener listener) {
         JButton btn = subjectButtons.get(subject);
         if (btn != null) {
-            btn.addActionListener(listener);
+            btn.addActionListener(e -> {
+
+                if (selectedSubjectButton != null) {
+                    selectedSubjectButton.setBackground(Color.WHITE);
+                    selectedSubjectButton.setForeground(Color.BLACK);
+                }
+
+                btn.setBackground(new Color(30, 110, 160));
+                btn.setForeground(Color.WHITE);
+                selectedSubjectButton = btn;
+
+                listener.actionPerformed(e);
+            });
         }
     }
 
@@ -399,7 +412,21 @@ public class LecturePageView extends JPanel {
     public void addGradeButtonListener(String grade, ActionListener listener) {
         JButton btn = gradeButtons.get(grade);
         if (btn != null) {
-            btn.addActionListener(listener);
+            btn.addActionListener(e -> {
+
+                if (selectedGradeButton != null) {
+                    selectedGradeButton.setBackground(Color.WHITE);
+                    selectedGradeButton.setForeground(new Color(100, 110, 100));
+                    selectedGradeButton.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 1));
+                }
+
+                btn.setBackground(new Color(30, 110, 160));
+                btn.setForeground(Color.WHITE);
+                btn.setBorder(BorderFactory.createLineBorder(new Color(30, 110, 160), 2));
+                selectedGradeButton = btn;
+
+                listener.actionPerformed(e);
+            });
         }
     }
 
@@ -508,7 +535,7 @@ public class LecturePageView extends JPanel {
 
         // Controller 생성 및 연결 추가
         LectureService lectureService = new LectureService(/* repository 전달 필요 */);
-        String currentUserId = "testUser";  // 실제로는 로그인된 사용자 ID
+        String currentUserId = "testUser"; // 실제로는 로그인된 사용자 ID
         new LectureDetailController(detail, lectureService, currentUserId, lecture.getLectureId());
 
         detail.show();
@@ -529,6 +556,10 @@ public class LecturePageView extends JPanel {
         sortCombo.setSelectedIndex(0);
         academyCombo.setSelectedIndex(0);
 
+        // 선택된 버튼 초기화
+        selectedSubjectButton = null;
+        selectedGradeButton = null;
+
         // 모든 과목 버튼 초기화
         for (JButton btn : subjectButtons.values()) {
             btn.setBackground(Color.WHITE);
@@ -543,6 +574,28 @@ public class LecturePageView extends JPanel {
         }
     }
 
+
+    /**
+     * 과목 버튼을 제외한 나머지 필터 초기화
+     */
+    public void resetFiltersExceptSubject() {
+        // 검색어 초기화
+        searchField.setText("");
+
+        // 정렬 초기화
+        sortCombo.setSelectedIndex(0);
+
+        // 학원 초기화
+        academyCombo.setSelectedIndex(0);
+
+        // 학년 버튼만 초기화
+        selectedGradeButton = null;
+        for (JButton btn : gradeButtons.values()) {
+            btn.setForeground(new Color(100, 110, 100));
+            btn.setBackground(Color.WHITE);
+            btn.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 1));
+        }
+    }
     // ========== 함수형 인터페이스 ==========
 
     /**
