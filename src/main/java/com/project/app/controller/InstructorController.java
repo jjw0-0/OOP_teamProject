@@ -22,6 +22,7 @@ public class InstructorController {
 
     private final InstructorService instructorService;
     private final InstructorsPageView view;
+    private String currentSort = "reviewScore";
 
     public InstructorController(InstructorService instructorService, InstructorsPageView view) {
         this.instructorService = instructorService;
@@ -35,9 +36,7 @@ public class InstructorController {
      * 초기 강사 목록 로드
      */
     public void initialize() {
-        InstructorSearchRequest request = new InstructorSearchRequest();
-        InstructorListResponse response = instructorService.searchInstructors(request);
-        updateInstructorList(response);
+        refreshList();
     }
 
     /**
@@ -46,14 +45,7 @@ public class InstructorController {
      * @param keyword 검색 키워드
      */
     public void handleSearch(String keyword) {
-        InstructorSearchRequest request = new InstructorSearchRequest(
-                keyword,
-                view.getSelectedSubject(),
-                null,  // Academy는 패스
-                "reviewScore"  // 기본 정렬
-        );
-        InstructorListResponse response = instructorService.searchInstructors(request);
-        updateInstructorList(response);
+        refreshList();
     }
 
     /**
@@ -62,14 +54,26 @@ public class InstructorController {
      * @param subject 선택된 과목
      */
     public void handleSubjectFilter(String subject) {
-        InstructorSearchRequest request = new InstructorSearchRequest(
-                view.getSearchKeyword(),
-                subject,
-                null,  // Academy는 패스
-                "reviewScore"  // 기본 정렬
-        );
-        InstructorListResponse response = instructorService.searchInstructors(request);
-        updateInstructorList(response);
+        refreshList();
+    }
+
+    /**
+     * 학원 필터 처리
+     *
+     * @param academyId 선택된 학원 ID
+     */
+    public void handleAcademyFilter(String academyId) {
+        refreshList();
+    }
+
+    /**
+     * 정렬 옵션 변경 처리
+     *
+     * @param sortOrder 정렬 키
+     */
+    public void handleSortChange(String sortOrder) {
+        this.currentSort = sortOrder != null ? sortOrder : "reviewScore";
+        refreshList();
     }
 
     /**
@@ -104,6 +108,20 @@ public class InstructorController {
 
         List<InstructorCardView> instructors = response.getInstructors();
         view.updateInstructorCards(instructors);
+    }
+
+    private void refreshList() {
+        InstructorListResponse response = instructorService.searchInstructors(buildCurrentRequest());
+        updateInstructorList(response);
+    }
+
+    private InstructorSearchRequest buildCurrentRequest() {
+        return new InstructorSearchRequest(
+                view.getSearchKeyword(),
+                view.getSelectedSubject(),
+                view.getSelectedAcademy(),
+                currentSort
+        );
     }
 }
 

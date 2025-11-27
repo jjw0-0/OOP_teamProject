@@ -149,8 +149,13 @@ public class InstructorService {
                     .collect(Collectors.toList());
         }
 
-        // 학원 필터 (패스)
-        // if (request.getAcademyId() != null) { ... }
+        // 학원 필터
+        if (request.getAcademyId() != null && !request.getAcademyId().trim().isEmpty()) {
+            String academyId = request.getAcademyId().trim();
+            filtered = filtered.stream()
+                    .filter(instructor -> instructor.getAcademyId().equalsIgnoreCase(academyId))
+                    .collect(Collectors.toList());
+        }
 
         return filtered;
     }
