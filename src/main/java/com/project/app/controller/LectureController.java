@@ -3,6 +3,7 @@ package com.project.app.controller;
 import com.project.app.model.Lecture;
 import com.project.app.repository.LectureRepositoryImpl;
 import com.project.app.service.LectureService;
+import com.project.app.view.LectureDetailView;
 import com.project.app.view.LecturePageView;
 
 import java.util.List;
@@ -287,6 +288,18 @@ public class LectureController {
 
     public String getCurrentKeyword() {
         return currentKeyword;
+    }
+    
+    /**
+     * 강의 상세 정보 다이얼로그 표시 및 Controller 연결
+     * 
+     * @param detailView LectureDetailView 인스턴스
+     * @param lectureId 강의 ID
+     */
+    public void showLectureDetail(LectureDetailView detailView, String lectureId) {
+        // LectureDetailController 생성 및 연결
+        String currentUserId = "testUser"; // 실제로는 로그인된 사용자 ID를 가져와야 함
+        new LectureDetailController(detailView, service, currentUserId, lectureId);
     }
 }
     

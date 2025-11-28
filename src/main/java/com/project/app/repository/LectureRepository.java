@@ -28,18 +28,18 @@ public interface LectureRepository {
     /**
      * 강사명으로 강의 목록 조회
      */
-    List<Lecture> findByInstructorName(String instructorName);
+    //List<Lecture> findByInstructorName(String instructorName);
 
     /**
      * 강사 ID로 강의 목록 조회
      * (강사 ID는 강사명과 매칭)
      */
-    List<Lecture> findByInstructorId(String instructorId);
+    //List<Lecture> findByInstructorId(String instructorId);
 
     /**
      * 과목으로 강의 목록 조회
      */
-    List<Lecture> findBySubject(String subject);
+    //List<Lecture> findBySubject(String subject);
 
     /**
      * 강의 ID 목록으로 강의 목록 조회

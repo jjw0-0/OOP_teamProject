@@ -8,8 +8,12 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
-public class LectureRepositoryImpl {
+public class LectureRepositoryImpl implements LectureRepository{
     private static ArrayList<Lecture> lectureList=new ArrayList<>();
+
+    public LectureRepositoryImpl() {
+        loadLecturesFromFile("src/main/data/LectureData.txt");
+    }
 
     public void loadLecturesFromFile(String filename) {
         lectureList.clear();
@@ -101,6 +105,7 @@ public class LectureRepositoryImpl {
     }
 
     // id로 강의 찾기
+    @Override
     public Lecture findById(String id){
         for(Lecture lec:lectureList){
             if(id.equals(lec.getLectureId())){
@@ -109,8 +114,24 @@ public class LectureRepositoryImpl {
         }
         return null;
     }
+    @Override
     public ArrayList<Lecture> findAll(){
         return lectureList;
     }
-
+    @Override
+    public List<Lecture> findByIds(List<String> lectureIds){
+        // null 체크 및 빈 리스트 체크
+        if (lectureIds == null || lectureIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        // 성능 최적화: HashSet으로 변환하여 O(1) 조회
+        java.util.Set<String> idSet = new java.util.HashSet<>(lectureIds);
+        
+        // lectureList에서 idSet에 포함된 강의만 필터링
+        return lectureList.stream()
+                .filter(lecture -> lecture != null && lecture.getLectureId() != null)
+                .filter(lecture -> idSet.contains(lecture.getLectureId()))
+                .collect(Collectors.toList());
+    }
 }

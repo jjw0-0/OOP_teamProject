@@ -3,10 +3,7 @@ package com.project.app.view;
 import javax.swing.*;
 
 import com.project.app.controller.LectureController;
-import com.project.app.controller.LectureDetailController;
 import com.project.app.model.Lecture;
-import com.project.app.repository.LectureRepositoryImpl;
-import com.project.app.service.LectureService;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -41,6 +38,9 @@ public class LecturePageView extends JPanel {
 
     // 이벤트 리스너
     private LectureCardClickListener cardClickListener;
+    
+    // Controller 참조
+    private LectureController controller;
 
     /**
      * 싱글톤 인스턴스를 반환하는 메서드
@@ -72,16 +72,24 @@ public class LecturePageView extends JPanel {
         scrollPane.setBorder(null);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         add(scrollPane, BorderLayout.CENTER);
-
-        System.out.println("현재 작업 디렉토리: " + System.getProperty("user.dir"));
-        String filePath = System.getProperty("user.dir") + "\\src\\main\\data\\LectureData.txt";
-        System.out.println("파일 경로: " + filePath);
-
-        LectureRepositoryImpl repository = new LectureRepositoryImpl();
-        repository.loadLecturesFromFile(filePath);
-
-        LectureService service = new LectureService(repository);
-        new LectureController(this, service, repository);
+    }
+    
+    /**
+     * Controller 설정
+     * 
+     * @param controller LectureController 인스턴스
+     */
+    public void setController(LectureController controller) {
+        this.controller = controller;
+    }
+    
+    /**
+     * Controller 반환
+     * 
+     * @return LectureController 인스턴스
+     */
+    public LectureController getController() {
+        return controller;
     }
 
     private JPanel contentPanel;
@@ -533,10 +541,12 @@ public class LecturePageView extends JPanel {
                 lecture.getGrade(),
                 lecture.getThumbnailPath());
 
-        // Controller 생성 및 연결 추가
-        LectureService lectureService = new LectureService(/* repository 전달 필요 */);
-        String currentUserId = "testUser"; // 실제로는 로그인된 사용자 ID
-        new LectureDetailController(detail, lectureService, currentUserId, lecture.getLectureId());
+        // Controller를 통해 LectureDetailController 생성 및 연결
+        if (controller != null) {
+            controller.showLectureDetail(detail, lecture.getLectureId());
+        } else {
+            System.err.println("LectureController가 설정되지 않았습니다.");
+        }
 
         detail.show();
     }

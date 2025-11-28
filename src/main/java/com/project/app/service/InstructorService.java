@@ -88,13 +88,13 @@ public class InstructorService {
         List<InstructorDetailResponse.LectureSummary> lectureSummaries = lectures.stream()
                 .map(lecture -> {
                     // 강의별 리뷰 평균 별점 계산
-                    List<Review> lectureReviews = reviewRepository.findByLectureId(lecture.getId());
+                    List<Review> lectureReviews = reviewRepository.findByLectureId(lecture.getLectureId());
                     double avgRating = calculateAverageRating(lectureReviews);
                     return new InstructorDetailResponse.LectureSummary(
-                            lecture.getId(),
-                            lecture.getName(),
+                            lecture.getLectureId(),
+                            lecture.getTitle(),
                             avgRating,
-                            lecture.getPrice()
+                            lecture.getLecturePrice()
                     );
                 })
                 .collect(Collectors.toList());
