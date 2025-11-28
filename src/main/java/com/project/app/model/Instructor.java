@@ -8,7 +8,7 @@ import java.util.List;
  * Instructor Model
  *
  * 특징:
- * - 강사 기본 정보는 불변 (id, name, academyId, introduction, subject)
+ * - 강사 기본 정보는 불변 (id, name, academyId, introduction, subject, rating)
  * - 교재 및 강의 정보는 읽기 전용 (textbookIds, lectureIds)
  * - 수강 학생 목록만 변경 가능 (studentIds)
  *
@@ -25,6 +25,7 @@ public class Instructor {
     private final String academyId;
     private final String introduction; // 강사 소개글
     private final String subject;  // 담당 과목
+    private final double rating; // 별점 (Rating) 필드 추가
 
     // ========== 읽기 전용 필드 (Related Data) ==========
 
@@ -50,18 +51,20 @@ public class Instructor {
      * @param textbookId 교재 ID
      * @param lectureIds 강의 ID 목록
      * @param studentIds 수강생 ID 목록
+     * @param rating 별점 (Rating) 추가
      */
     public Instructor(String id, String name, String academyId, String introduction, String subject,
-                     String textbookId, List<String> lectureIds, List<String> studentIds) {
+                      String textbookId, List<String> lectureIds, List<String> studentIds, double rating) { // rating 인자 추가
         this.id = id;
         this.name = name;
         this.academyId = academyId;
         this.introduction = introduction;
         this.subject = subject != null ? subject : "";
+        this.rating = rating; // rating 초기화
         this.textbookId = textbookId; // Can be null
         // 불변 리스트로 저장
         this.lectureIds = Collections.unmodifiableList(
-            lectureIds != null ? new ArrayList<>(lectureIds) : new ArrayList<>()
+                lectureIds != null ? new ArrayList<>(lectureIds) : new ArrayList<>()
         );
         // 학생 목록만 변경 가능
         this.studentIds = studentIds != null ? new ArrayList<>(studentIds) : new ArrayList<>();
@@ -87,6 +90,13 @@ public class Instructor {
 
     public String getSubject() {
         return subject;
+    }
+
+    /**
+     * 별점 조회 (새로 추가)
+     */
+    public double getRating() {
+        return rating;
     }
 
     /**
@@ -154,7 +164,6 @@ public class Instructor {
     // ========== 조회 메서드 ==========
 
 
-
     /**
      * 특정 강의 진행 여부 확인
      */
@@ -169,6 +178,7 @@ public class Instructor {
                 ", name='" + name + '\'' +
                 ", academyId='" + academyId + '\'' +
                 ", subject='" + subject + '\'' +
+                ", rating=" + rating + // toString에 rating 추가
                 ", textbookId='" + (textbookId != null ? textbookId : "없음") + '\'' +
                 ", lectureCount=" + lectureIds.size() +
                 ", studentCount=" + studentIds.size() +

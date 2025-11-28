@@ -54,6 +54,7 @@ public class InstructorRepositoryImpl implements InstructorRepository {
             Instructor first = instructorCache.values().iterator().next();
             System.out.println("첫 번째 강사 ID: " + first.getId());
             System.out.println("첫 번째 강사 이름: " + first.getName());
+            System.out.println("첫 번째 강사 별점: " + first.getRating()); // 별점 출력 추가
             System.out.println("첫 번째 강사 프로필 경로: " + first.getProfileImagePath());
         }
 
@@ -136,8 +137,8 @@ public class InstructorRepositoryImpl implements InstructorRepository {
     private void saveDataToFile() {
         try {
             List<String> lines = new ArrayList<>();
-            // 헤더에 ProfileImage 필드 추가
-            lines.add("InstructorID/InstructorName/AcademyID/Introduction/Subject/TextbookIDs/LectureIDs/StudentIDs/ProfileImage");
+            // 헤더에 Rating 필드 추가
+            lines.add("InstructorID/InstructorName/AcademyID/Introduction/Subject/TextbookIDs/LectureIDs/StudentIDs/Rating/ProfileImage");
             instructorCache.values().forEach(instructor -> lines.add(instructorToLine(instructor)));
             Files.write(Paths.get(DATA_FILE_PATH), lines);
             System.out.println("Instructor data saved: " + instructorCache.size() + " instructors");
@@ -150,7 +151,7 @@ public class InstructorRepositoryImpl implements InstructorRepository {
     /**
      * 데이터 파일의 한 줄 문자열을 파싱하여 `Instructor` 객체로 변환합니다.
      *
-     * @param line 데이터 파일의 한 줄에 해당하는 문자열 (예: "id/name/academyId/introduction/subject/textbookId/lectureIds/studentIds")
+     * @param line 데이터 파일의 한 줄에 해당하는 문자열 (예: "id/name/academyId/introduction/subject/textbookId/lectureIds/studentIds/rating/profileImage")
      * @return 파싱에 성공하면 `Instructor` 객체, 데이터 형식 오류나 파싱 중 예외 발생 시 `null`
      */
     private Instructor parseLineToInstructor(String line) {
@@ -158,12 +159,14 @@ public class InstructorRepositoryImpl implements InstructorRepository {
             return null;
         }
         try {
+            // 필드가 9개 (ID~ProfileImage)이므로 최소 9개
             String[] parts = line.split(FIELD_DELIMITER, -1);
-            if (parts.length < 7) {  // 최소 7개 필드
+            if (parts.length < 9) {
                 System.err.println("Invalid data format: " + line);
                 return null;
             }
 
+            // 필드 0~6: 기존 필드
             String id = parts[0].trim();
             String name = parts[1].trim();
             String academyId = parts[2].trim();
@@ -174,18 +177,30 @@ public class InstructorRepositoryImpl implements InstructorRepository {
             String textbookId = textbookIds.isEmpty() ? null : textbookIds.get(0);
             List<String> lectureIds = parseList(parts[6]);
 
-            // 수강생 목록은 현재 데이터에 없으므로 빈 리스트
-            List<String> studentIds = new ArrayList<>();
+            // 필드 7: StudentIDs
+            List<String> studentIds = parseList(parts[7]);
 
-            // 프로필 이미지는 8번째 (index 7)
-            String profileImageFileName = parts.length > 7 ? parts[7].trim() : null;
+            // 필드 8: Rating (별점) --- 새로 추가된 부분 ---
+            double rating = 0.0;
+            try {
+                rating = Double.parseDouble(parts[8].trim());
+            } catch (NumberFormatException ignored) {
+                // 파싱 실패 시 기본값 0.0 유지
+            }
+
+            // 필드 9: ProfileImage (index 9)
+            String profileImageFileName = parts.length > 9 ? parts[9].trim() : null;
             String profileImagePath = null;
             if (profileImageFileName != null && !profileImageFileName.isEmpty()) {
                 profileImagePath = "InstructorThumbnail/" + profileImageFileName;
             }
 
+            // Instructor 생성자 호출 시 Rating 필드 추가 필요
+            // (Instructor 모델 클래스에 rating 필드와 getter/setter가 있다고 가정)
             Instructor instructor = new Instructor(id, name, academyId, introduction, subject,
-                    textbookId, lectureIds, studentIds);
+                    textbookId, lectureIds, studentIds,rating);
+
+
 
             if (profileImagePath != null) {
                 instructor.setProfileImagePath(profileImagePath);
@@ -228,6 +243,7 @@ public class InstructorRepositoryImpl implements InstructorRepository {
                 instructor.getTextbookId() != null ? instructor.getTextbookId() : "",
                 listToString(instructor.getLectureIds()),
                 listToString(instructor.getStudentIds()),
+                String.valueOf(instructor.getRating()), // 별점 추가
                 profileImageFileName  // 파일명만 저장
         );
     }
