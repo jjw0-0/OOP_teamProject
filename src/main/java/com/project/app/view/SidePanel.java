@@ -339,7 +339,12 @@ public class SidePanel extends JFrame {
 
         // 강사 목록
         setMenuListener(MenuItem.INSTRUCTOR, e -> {
-            showContent(InstructorsPageView.getInstance());
+            InstructorsPageView view = InstructorsPageView.getInstance();
+            // Controller 초기화 (한 번만)
+            if (view.getController() == null) {
+                initializeInstructorController(view);
+            }
+            showContent(view);
         });
 
         // 마이페이지
@@ -616,6 +621,38 @@ public class SidePanel extends JFrame {
      */
     public MenuItem getSelectedItem() {
         return selectedItem;
+    }
+
+    /**
+     * 강사 페이지 Controller 초기화
+     *
+     * @param view InstructorsPageView 인스턴스
+     */
+    private void initializeInstructorController(InstructorsPageView view) {
+        try {
+            // Repository 인스턴스 생성
+            com.project.app.repository.InstructorRepository instructorRepository = 
+                new com.project.app.repository.InstructorRepositoryImpl();
+            com.project.app.repository.LectureRepository lectureRepository = 
+                new com.project.app.repository.LectureRepositoryImpl();
+            com.project.app.repository.TextbookRepository textbookRepository = 
+                new com.project.app.repository.TextbookRepositoryImpl();
+            com.project.app.repository.ReviewRepository reviewRepository = 
+                new com.project.app.repository.ReviewRepositoryImpl();
+
+            // Service 인스턴스 생성
+            com.project.app.service.InstructorService instructorService = 
+                new com.project.app.service.InstructorService(
+                    instructorRepository, lectureRepository, textbookRepository, reviewRepository);
+
+            // Controller 인스턴스 생성 및 연결
+            com.project.app.controller.InstructorController controller = 
+                new com.project.app.controller.InstructorController(instructorService, view);
+            view.setController(controller);
+        } catch (Exception e) {
+            System.err.println("강사 Controller 초기화 실패: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     // ======================== 테스트용 메인 메서드 ========================

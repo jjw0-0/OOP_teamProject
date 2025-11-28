@@ -50,9 +50,10 @@ public class Instructor {
      * @param textbookId 교재 ID
      * @param lectureIds 강의 ID 목록
      * @param studentIds 수강생 ID 목록
+     * @param profileImagePath 프로필 이미지 경로
      */
     public Instructor(String id, String name, String academyId, String introduction, String subject,
-                     String textbookId, List<String> lectureIds, List<String> studentIds) {
+                     String textbookId, List<String> lectureIds, List<String> studentIds, String profileImagePath) {
         this.id = id;
         this.name = name;
         this.academyId = academyId;
@@ -65,6 +66,7 @@ public class Instructor {
         );
         // 학생 목록만 변경 가능
         this.studentIds = studentIds != null ? new ArrayList<>(studentIds) : new ArrayList<>();
+        this.profileImagePath = profileImagePath;
     }
 
     // ========== Getter 메서드 ==========

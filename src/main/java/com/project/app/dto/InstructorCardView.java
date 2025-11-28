@@ -54,6 +54,12 @@ public class InstructorCardView {
      */
     private final String subject;
 
+    /**
+     * 학원
+     * 강사가 속한 학원
+     */
+    private final String academy;
+
     // ========== 생성자 ==========
 
     /**
@@ -68,13 +74,14 @@ public class InstructorCardView {
      */
     public InstructorCardView(String id, String name, String introduction,
                              String profileImagePath, double reviewScore,
-                             String subject) {
+                             String subject, String academy) {
         this.id = id;
         this.name = name;
         this.introduction = introduction;
         this.profileImagePath = profileImagePath;
         this.reviewScore = reviewScore;
         this.subject = subject;
+        this.academy = academy;
     }
 
     // ========== Getter 메서드 ==========
@@ -102,6 +109,9 @@ public class InstructorCardView {
     public String getSubject() {
         return subject;
     }
+    public String getAcademy() {
+        return academy;
+    }
 
     @Override
     public String toString() {
@@ -109,6 +119,7 @@ public class InstructorCardView {
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 ", subject='" + subject + '\'' +
+                ", academy='" + academy + '\'' +
                 ", reviewScore=" + reviewScore +
                 '}';
     }
