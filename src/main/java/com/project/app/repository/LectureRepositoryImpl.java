@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  */
 public class LectureRepositoryImpl implements LectureRepository {
 
-    private static final String DATA_FILE_PATH = "src/main/data/LeactureData.txt";
+    private static final String DATA_FILE_PATH = "src/main/data/LectureData.txt";
     private static final String FIELD_DELIMITER = "/";
 
     private final Map<String, Lecture> lectureCache;

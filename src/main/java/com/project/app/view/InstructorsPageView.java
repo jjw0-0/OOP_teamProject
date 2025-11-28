@@ -47,9 +47,9 @@ public class InstructorsPageView extends JPanel {
     private static final Map<String, String> ACADEMY_OPTIONS = new LinkedHashMap<>();
     static {
         ACADEMY_OPTIONS.put("전체", null);
-        ACADEMY_OPTIONS.put("메가스터디", "A001");
-        ACADEMY_OPTIONS.put("이투스", "A002");
-        ACADEMY_OPTIONS.put("대성마이맥", "A003");
+        ACADEMY_OPTIONS.put("메가스터디", "A1");
+        ACADEMY_OPTIONS.put("이투스", "A2");
+        ACADEMY_OPTIONS.put("대성마이맥", "A3");
     }
 
     private InstructorController controller;
@@ -304,7 +304,7 @@ public class InstructorsPageView extends JPanel {
         profile.setOpaque(false);
 
         // 사진 (이미지 패스)
-        profile.add(createImagePlaceholder(83, 83));
+        profile.add(createImagePlaceholder(83, 83, cardView.getProfileImagePath()));
 
         JPanel wrapInfo = new JPanel();
         wrapInfo.setLayout(new BoxLayout(wrapInfo, BoxLayout.Y_AXIS));
@@ -349,13 +349,49 @@ public class InstructorsPageView extends JPanel {
     /**
      * 이미지 플레이스홀더 생성 (이미지 패스)
      */
-    private JLabel createImagePlaceholder(int width, int height) {
-        JLabel placeholder = new JLabel("👤", SwingConstants.CENTER);
-        placeholder.setPreferredSize(new Dimension(width, height));
-        placeholder.setOpaque(true);
-        placeholder.setBackground(Color.LIGHT_GRAY);
-        placeholder.setFont(new Font("Dialog", Font.PLAIN, 40));
-        return placeholder;
+    private static JLabel createImagePlaceholder(int width, int height, String imagePath) {
+        JLabel imageLabel = new JLabel();
+        imageLabel.setPreferredSize(new Dimension(width, height));
+        imageLabel.setOpaque(true);
+        imageLabel.setBackground(Color.LIGHT_GRAY);
+        imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        imageLabel.setVerticalAlignment(SwingConstants.CENTER);
+        
+        // 이미지 경로가 있으면 이미지 로드
+        if (imagePath != null && !imagePath.trim().isEmpty()) {
+            try {
+                String fullPath = "src/main/resources/InstructorThumbnail/" + imagePath.trim();
+                java.io.File imageFile = new java.io.File(fullPath);
+                
+                if (imageFile.exists()) {
+                    ImageIcon originalIcon = new ImageIcon(fullPath);
+                    Image originalImage = originalIcon.getImage();
+                    
+                    // 이미지 크기 조정
+                    Image scaledImage = originalImage.getScaledInstance(
+                        width, height, 
+                        java.awt.Image.SCALE_SMOOTH
+                    );
+                    ImageIcon scaledIcon = new ImageIcon(scaledImage);
+                    imageLabel.setIcon(scaledIcon);
+                    imageLabel.setText(""); // 텍스트 제거
+                } else {
+                    // 이미지를 찾을 수 없을 때 플레이스홀더 표시
+                    imageLabel.setText("👤");
+                    imageLabel.setFont(new Font("Dialog", Font.PLAIN, 40));
+                }
+            } catch (Exception e) {
+                // 이미지 로드 실패 시 플레이스홀더 표시
+                imageLabel.setText("👤");
+                imageLabel.setFont(new Font("Dialog", Font.PLAIN, 40));
+            }
+        } else {
+            // 이미지 경로가 없을 때 플레이스홀더 표시
+            imageLabel.setText("👤");
+            imageLabel.setFont(new Font("Dialog", Font.PLAIN, 40));
+        }
+        
+        return imageLabel;
     }
 
     /**
@@ -618,11 +654,7 @@ public class InstructorsPageView extends JPanel {
             profile.setOpaque(false);
 
             // 이미지 플레이스홀더
-            JLabel imageLabel = new JLabel("👤", SwingConstants.CENTER);
-            imageLabel.setPreferredSize(new Dimension(138, 138));
-            imageLabel.setOpaque(true);
-            imageLabel.setBackground(Color.LIGHT_GRAY);
-            imageLabel.setFont(new Font("Dialog", Font.PLAIN, 60));
+            JLabel imageLabel = createImagePlaceholder(138, 138, detail.getProfileImagePath());
             JPanel imagePanel = new JPanel();
             imagePanel.setOpaque(false);
             imagePanel.add(imageLabel);

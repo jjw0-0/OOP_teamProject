@@ -121,7 +121,7 @@ public class InstructorRepositoryImpl implements InstructorRepository {
         try {
             List<String> lines = new ArrayList<>();
             // 헤더 추가
-            lines.add("InstructorID/InstructorName/AcademyID/Introduction/Subject/TextbookIDs/LectureIDs/StudentIDs");
+            lines.add("강사ID/강사명/학원ID/소개/과목/교재목록/강의목록/수강생목록/별점/프로필 이미지");
             // 각 강사 정보를 라인으로 변환하여 추가
             instructorCache.values().forEach(instructor -> lines.add(instructorToLine(instructor)));
             Files.write(Paths.get(DATA_FILE_PATH), lines);
@@ -135,7 +135,7 @@ public class InstructorRepositoryImpl implements InstructorRepository {
     /**
      * 데이터 파일의 한 줄 문자열을 파싱하여 `Instructor` 객체로 변환합니다.
      *
-     * @param line 데이터 파일의 한 줄에 해당하는 문자열 (예: "id/name/academyId/introduction/subject/textbookId/lectureIds/studentIds")
+     * @param line 데이터 파일의 한 줄에 해당하는 문자열 (예: "id/name/academyId/introduction/subject/textbookId/lectureIds/studentIds/rating/profileImagePath")
      * @return 파싱에 성공하면 `Instructor` 객체, 데이터 형식 오류나 파싱 중 예외 발생 시 `null`
      */
     private Instructor parseLineToInstructor(String line) {
@@ -144,7 +144,7 @@ public class InstructorRepositoryImpl implements InstructorRepository {
         }
         try {
             String[] parts = line.split(FIELD_DELIMITER, -1);
-            if (parts.length < 8) {
+            if (parts.length < 9) {
                 System.err.println("Invalid data format: " + line);
                 return null;
             }
@@ -158,14 +158,16 @@ public class InstructorRepositoryImpl implements InstructorRepository {
             List<String> textbookIds = parseList(parts[5]);
             String textbookId = textbookIds.isEmpty() ? null : textbookIds.get(0); // 더 명시적인 코드로 변경
             List<String> lectureIds = parseList(parts[6]);
-            List<String> studentIds = parseList(parts[7]);
+            List<String> studentIds = new ArrayList<>();
+            // parts[8]는 별점이지만 사용하지 않음
+            String profileImagePath = parts[8].trim();
 
             return new Instructor(id, name, academyId, introduction, subject,
-                    textbookId, lectureIds, studentIds);
+                    textbookId, lectureIds, studentIds, profileImagePath);
 
         } catch (Exception e) {
             System.err.println("Data parsing error: " + line);
-e.printStackTrace();
+            e.printStackTrace();
             return null;
         }
     }
@@ -186,7 +188,9 @@ e.printStackTrace();
                 instructor.getSubject() != null ? instructor.getSubject() : "",
                 instructor.getTextbookId() != null ? instructor.getTextbookId() : "", // getTextbookId() 사용
                 listToString(instructor.getLectureIds()),
-                listToString(instructor.getStudentIds())
+                listToString(instructor.getStudentIds()),
+                "", // 별점 필드 (사용하지 않음)
+                instructor.getProfileImagePath() != null ? instructor.getProfileImagePath() : ""
         );
     }
 
