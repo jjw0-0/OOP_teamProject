@@ -632,11 +632,13 @@ public class SidePanel extends JFrame {
                 new com.project.app.repository.LectureRepositoryImpl();
             com.project.app.repository.TextbookRepository textbookRepository = 
                 new com.project.app.repository.TextbookRepositoryImpl();
+            com.project.app.repository.ReviewRepository reviewRepository = 
+                new com.project.app.repository.ReviewRepositoryImpl();
 
             // Service 인스턴스 생성
             com.project.app.service.InstructorService instructorService = 
                 new com.project.app.service.InstructorService(
-                    instructorRepository, lectureRepository, textbookRepository);
+                    instructorRepository, lectureRepository, textbookRepository, reviewRepository);
 
             // Controller 인스턴스 생성 및 연결
             com.project.app.controller.InstructorController controller = 

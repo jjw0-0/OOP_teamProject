@@ -294,8 +294,9 @@ public class InstructorsPageView extends JPanel {
         });
 
         // 소개글
-        instructorCard.add(Box.createVerticalStrut(26));
-        instructorCard.add(createSubjectLabelPanel(cardView.getSubject()));
+        instructorCard.add(Box.createVerticalStrut(16));
+        instructorCard.add(createSubjectLabelPanel(cardView.getSubject(), cardView.getAcademy()));
+        instructorCard.add(Box.createVerticalStrut(10));
 
         // 프로필 (사진 + 이름 + 별점)
         JPanel profile = new JPanel();
@@ -328,7 +329,7 @@ public class InstructorsPageView extends JPanel {
     /**
      * 과목 표시 패널 생성
      */
-    private JPanel createSubjectLabelPanel(String subject) {
+    private JPanel createSubjectLabelPanel(String subject, String academy) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setMaximumSize(new Dimension(CARD_WIDTH-20, 30));
         panel.setOpaque(false);
@@ -337,8 +338,16 @@ public class InstructorsPageView extends JPanel {
         if (text.isEmpty()) {
             text = "과목 정보 없음";
         }
-        text = truncateWithEllipsis("[" + text + "]", 20);
-
+        text = "[" + text + "]";
+        String academyName = "";
+        if(academy.equals("A1")) {
+            academyName = "메가스터디";
+        } else if(academy.equals("A2")) {
+            academyName = "이투스";
+        } else if(academy.equals("A3")) {
+            academyName = "대성마이맥";
+        }
+        text = text + " [" + academyName + "]";
         JLabel label = new JLabel(text, SwingConstants.LEFT);
         label.setFont(new Font("맑은 고딕", Font.BOLD, 15));
         panel.add(label, BorderLayout.CENTER);
@@ -627,21 +636,24 @@ public class InstructorsPageView extends JPanel {
 
         JPanel createLecturePanel(InstructorDetailResponse.LectureSummary lecture) {
             JPanel lecturePanel = new JPanel();
-            lecturePanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+            lecturePanel.setLayout(new BorderLayout());
             lecturePanel.setMaximumSize(new Dimension(352, 31));
             lecturePanel.setBackground(Color.WHITE);
 
-            JLabel nameLabel = new JLabel(InstructorsPageView.truncateWithEllipsis(lecture.getName(), 25));
+            // 강의명 (왼쪽 정렬)
+            JLabel nameLabel = new JLabel(InstructorsPageView.truncateWithEllipsis(" "+lecture.getName(), 25));
             nameLabel.setFont(new Font("맑은 고딕", Font.BOLD, 18));
-            lecturePanel.add(nameLabel);
+            nameLabel.setHorizontalAlignment(SwingConstants.LEFT);
+            lecturePanel.add(nameLabel, BorderLayout.WEST);
 
-            // 별점 표시
+            // 별점 (오른쪽 정렬)
             String scoreText = lecture.getReviewScore() > 0 ? 
                     String.format("%.1f", lecture.getReviewScore()) : "0.0";
             JLabel starLabel = new JLabel("<html><font color='#FFD700'>⭐</font>" +
-                    " <font color='black'>" + scoreText + "</font></html>");
+                    " <font color='black'>" + scoreText + "  </font></html>");
             starLabel.setFont(new Font("Segoe UI Emoji", Font.BOLD, 18));
-            lecturePanel.add(starLabel);
+            starLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+            lecturePanel.add(starLabel, BorderLayout.EAST);
 
             return lecturePanel;
         }
@@ -654,7 +666,7 @@ public class InstructorsPageView extends JPanel {
             profile.setOpaque(false);
 
             // 이미지 플레이스홀더
-            JLabel imageLabel = createImagePlaceholder(138, 138, detail.getProfileImagePath());
+            JLabel imageLabel = createImagePlaceholder(160, 160, detail.getProfileImagePath());
             JPanel imagePanel = new JPanel();
             imagePanel.setOpaque(false);
             imagePanel.add(imageLabel);
@@ -679,8 +691,8 @@ public class InstructorsPageView extends JPanel {
             JPanel starRating = new JPanel();
             starRating.setOpaque(false);
             starRating.setLayout(new BorderLayout(0, 3));
-            starRating.setMaximumSize(new Dimension(160, 280));
-            starRating.setPreferredSize(new Dimension(160, 280));
+            starRating.setMaximumSize(new Dimension(160, 230));
+            starRating.setPreferredSize(new Dimension(160, 230));
 
             JLabel reviewLabel = new JLabel("강의평");
             reviewLabel.setFont(new Font("맑은 고딕", Font.BOLD, 18));
@@ -701,12 +713,87 @@ public class InstructorsPageView extends JPanel {
 
             starRating.add(reviewPanel, BorderLayout.NORTH);
 
-            // 리뷰 목록은 비어있음 (리뷰 제외)
+            // 강의별 리뷰 표시
             JPanel reviews = new JPanel();
             reviews.setLayout(new BoxLayout(reviews, BoxLayout.Y_AXIS));
             reviews.setBackground(new Color(0xEEEEEE));
+            reviews.add(Box.createVerticalStrut(5));
 
-            starRating.add(reviews, BorderLayout.CENTER);
+            // ReviewRepository를 사용하여 강의별 리뷰 가져오기
+            com.project.app.repository.ReviewRepository reviewRepository = 
+                new com.project.app.repository.ReviewRepositoryImpl();
+
+            if (detail.getLectures() != null && !detail.getLectures().isEmpty()) {
+                for (InstructorDetailResponse.LectureSummary lecture : detail.getLectures()) {
+                    // 강의별 리뷰 가져오기
+                    java.util.List<com.project.app.model.Review> lectureReviews = 
+                        reviewRepository.findByLectureId(lecture.getId());
+                    
+                    if (!lectureReviews.isEmpty()) {
+                        // 각 개별 리뷰 표시
+                        for (com.project.app.model.Review review : lectureReviews) {
+                            JPanel reviewItemPanel = new JPanel();
+                            reviewItemPanel.setLayout(new BoxLayout(reviewItemPanel, BoxLayout.Y_AXIS));
+                            reviewItemPanel.setMaximumSize(new Dimension(150, 100));
+                            reviewItemPanel.setOpaque(false);
+                            reviewItemPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+                            reviewItemPanel.setBackground(Color.WHITE);
+                            reviewItemPanel.setOpaque(true);
+                            
+                            // 상단 패널: 유저명(왼쪽) + 별점(오른쪽)
+                            JPanel headerPanel = new JPanel();
+                            headerPanel.setLayout(new BorderLayout());
+                            headerPanel.setOpaque(false);
+                            headerPanel.setMaximumSize(new Dimension(150, 20));
+                            
+                            // 유저명 (왼쪽 위)
+                            JLabel userNameLabel = new JLabel(review.getUserId());
+                            userNameLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 12));
+                            userNameLabel.setHorizontalAlignment(SwingConstants.LEFT);
+                            headerPanel.add(userNameLabel, BorderLayout.WEST);
+                            
+                            // 별점 (오른쪽 위)
+                            String ratingText = String.format("%.1f", review.getRating());
+                            JLabel ratingLabel = new JLabel("<html><font color='#FFD700'>⭐</font>" +
+                                    " <font color='black'>" + ratingText + "</font></html>");
+                            ratingLabel.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 12));
+                            ratingLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+                            headerPanel.add(ratingLabel, BorderLayout.EAST);
+                            
+                            reviewItemPanel.add(headerPanel);
+                            reviewItemPanel.add(Box.createVerticalStrut(3));
+                            
+                            // 리뷰 내용 (아래)
+                            String reviewContent = review.getContent();
+                            if (reviewContent != null && !reviewContent.trim().isEmpty()) {
+                                JTextArea contentArea = new JTextArea(reviewContent);
+                                contentArea.setLineWrap(true);
+                                contentArea.setWrapStyleWord(true);
+                                contentArea.setEditable(false);
+                                contentArea.setOpaque(false);
+                                contentArea.setFont(new Font("맑은 고딕", Font.PLAIN, 10));
+                                contentArea.setMaximumSize(new Dimension(140, 60));
+                                //contentArea.setAlignmentX(Component.LEFT_ALIGNMENT);
+                                reviewItemPanel.add(contentArea);
+                            }
+                            
+                            reviews.add(reviewItemPanel);
+                            reviews.add(Box.createVerticalStrut(5));
+                        }
+                    }
+                }
+            }
+
+            // 스크롤 패널로 감싸기
+            JScrollPane reviewsScrollPane = new JScrollPane(reviews);
+            reviewsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+            reviewsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+            reviewsScrollPane.setBorder(null);
+            reviewsScrollPane.setOpaque(false);
+            reviewsScrollPane.getViewport().setOpaque(false);
+            reviewsScrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
+            starRating.add(reviewsScrollPane, BorderLayout.CENTER);
 
             return starRating;
         }

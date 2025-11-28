@@ -3,9 +3,11 @@ package com.project.app.service;
 import com.project.app.dto.*;
 import com.project.app.model.Instructor;
 import com.project.app.model.Lecture;
+import com.project.app.model.Review;
 import com.project.app.model.Textbook;
 import com.project.app.repository.InstructorRepository;
 import com.project.app.repository.LectureRepository;
+import com.project.app.repository.ReviewRepository;
 import com.project.app.repository.TextbookRepository;
 
 import java.util.ArrayList;
@@ -26,17 +28,19 @@ public class InstructorService {
     private final InstructorRepository instructorRepository;
     private final LectureRepository lectureRepository;
     private final TextbookRepository textbookRepository;
+    private final ReviewRepository reviewRepository;
 
-    // 리뷰는 제외하므로 평점은 기본값 0.0 사용
     private static final double DEFAULT_REVIEW_SCORE = 0.0;
     private static final int DEFAULT_REVIEW_COUNT = 0;
 
     public InstructorService(InstructorRepository instructorRepository,
                             LectureRepository lectureRepository,
-                            TextbookRepository textbookRepository) {
+                            TextbookRepository textbookRepository,
+                            ReviewRepository reviewRepository) {
         this.instructorRepository = instructorRepository;
         this.lectureRepository = lectureRepository;
         this.textbookRepository = textbookRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     // ========== Public Business Methods ==========
@@ -78,17 +82,21 @@ public class InstructorService {
             return null;
         }
 
-        // 2. 강의 목록 조회
-        // Instructor 모델의 lectureIds를 사용하여 강의 조회
+        // 2. 강의 목록 조회 및 강의별 평균 별점 계산
         List<String> lectureIds = instructor.getLectureIds();
         List<Lecture> lectures = lectureRepository.findByIds(lectureIds);
         List<InstructorDetailResponse.LectureSummary> lectureSummaries = lectures.stream()
-                .map(lecture -> new InstructorDetailResponse.LectureSummary(
-                        lecture.getId(),
-                        lecture.getName(),
-                        DEFAULT_REVIEW_SCORE,  // 리뷰 제외
-                        lecture.getPrice()
-                ))
+                .map(lecture -> {
+                    // 강의별 리뷰 평균 별점 계산
+                    List<Review> lectureReviews = reviewRepository.findByLectureId(lecture.getId());
+                    double avgRating = calculateAverageRating(lectureReviews);
+                    return new InstructorDetailResponse.LectureSummary(
+                            lecture.getId(),
+                            lecture.getName(),
+                            avgRating,
+                            lecture.getPrice()
+                    );
+                })
                 .collect(Collectors.toList());
 
         // 3. 교재 정보 조회 (첫 번째 교재 ID 사용)
@@ -107,7 +115,12 @@ public class InstructorService {
         // 4. 수강생 수 계산
         int studentCount = instructor.getStudentIds().size();
 
-        // 5. DTO 생성
+        // 5. 강사 전체 리뷰 평균 별점 계산
+        List<Review> instructorReviews = reviewRepository.findByInstructorId(instructorId);
+        double avgReviewScore = calculateAverageRating(instructorReviews);
+        int reviewCount = instructorReviews.size();
+
+        // 6. DTO 생성
         return new InstructorDetailResponse(
                 instructor.getId(),
                 instructor.getName(),
@@ -116,8 +129,8 @@ public class InstructorService {
                 instructor.getAcademyId(),
                 null,  // Academy 이름은 패스
                 instructor.getSubject(),
-                DEFAULT_REVIEW_SCORE,  // 리뷰 제외
-                DEFAULT_REVIEW_COUNT,  // 리뷰 제외
+                avgReviewScore,
+                reviewCount,
                 lectureSummaries,
                 textbookSummary,
                 studentCount
@@ -188,14 +201,32 @@ public class InstructorService {
      * Instructor Entity를 InstructorCardView DTO로 변환
      */
     private InstructorCardView convertToCardView(Instructor instructor) {
+        // 강사별 리뷰 평균 별점 계산
+        List<Review> reviews = reviewRepository.findByInstructorId(instructor.getId());
+        double avgRating = calculateAverageRating(reviews);
+        
         return new InstructorCardView(
                 instructor.getId(),
                 instructor.getName(),
                 instructor.getIntroduction(),
                 instructor.getProfileImagePath(),  // null일 수 있음
-                DEFAULT_REVIEW_SCORE,  // 리뷰 제외
-                instructor.getSubject()
+                avgRating,
+                instructor.getSubject(),
+                instructor.getAcademyId()
         );
+    }
+
+    /**
+     * 리뷰 목록의 평균 별점 계산
+     */
+    private double calculateAverageRating(List<Review> reviews) {
+        if (reviews == null || reviews.isEmpty()) {
+            return DEFAULT_REVIEW_SCORE;
+        }
+        double sum = reviews.stream()
+                .mapToDouble(Review::getRating)
+                .sum();
+        return sum / reviews.size();
     }
 
 }
