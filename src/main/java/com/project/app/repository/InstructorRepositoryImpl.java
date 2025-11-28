@@ -46,6 +46,21 @@ public class InstructorRepositoryImpl implements InstructorRepository {
     }
 
     @Override
+    public List<Instructor> getAllInstructors() {
+        System.out.println("========== Repository getAllInstructors 시작 ==========");
+        System.out.println("총 강사 수: " + instructorCache.size());
+
+        if (!instructorCache.isEmpty()) {
+            Instructor first = instructorCache.values().iterator().next();
+            System.out.println("첫 번째 강사 ID: " + first.getId());
+            System.out.println("첫 번째 강사 이름: " + first.getName());
+            System.out.println("첫 번째 강사 프로필 경로: " + first.getProfileImagePath());
+        }
+
+        return new ArrayList<>(instructorCache.values());
+    }
+
+    @Override
     public List<Instructor> findByAcademyId(String academyId) {
         return instructorCache.values().stream()
                 .filter(instructor -> instructor.getAcademyId().equals(academyId))
@@ -89,6 +104,7 @@ public class InstructorRepositoryImpl implements InstructorRepository {
         return instructor.getStudentIds();
     }
 
+
     // ========== Private Helper Methods ==========
     // 파일 데이터 로딩, 저장, 파싱 등 내부 로직을 처리하는 보조 메서드들입니다.
 
@@ -120,9 +136,8 @@ public class InstructorRepositoryImpl implements InstructorRepository {
     private void saveDataToFile() {
         try {
             List<String> lines = new ArrayList<>();
-            // 헤더 추가
-            lines.add("InstructorID/InstructorName/AcademyID/Introduction/Subject/TextbookIDs/LectureIDs/StudentIDs");
-            // 각 강사 정보를 라인으로 변환하여 추가
+            // 헤더에 ProfileImage 필드 추가
+            lines.add("InstructorID/InstructorName/AcademyID/Introduction/Subject/TextbookIDs/LectureIDs/StudentIDs/ProfileImage");
             instructorCache.values().forEach(instructor -> lines.add(instructorToLine(instructor)));
             Files.write(Paths.get(DATA_FILE_PATH), lines);
             System.out.println("Instructor data saved: " + instructorCache.size() + " instructors");
@@ -144,7 +159,7 @@ public class InstructorRepositoryImpl implements InstructorRepository {
         }
         try {
             String[] parts = line.split(FIELD_DELIMITER, -1);
-            if (parts.length < 8) {
+            if (parts.length < 7) {  // 최소 7개 필드
                 System.err.println("Invalid data format: " + line);
                 return null;
             }
@@ -156,16 +171,31 @@ public class InstructorRepositoryImpl implements InstructorRepository {
             String subject = parts[4].trim();
 
             List<String> textbookIds = parseList(parts[5]);
-            String textbookId = textbookIds.isEmpty() ? null : textbookIds.get(0); // 더 명시적인 코드로 변경
+            String textbookId = textbookIds.isEmpty() ? null : textbookIds.get(0);
             List<String> lectureIds = parseList(parts[6]);
-            List<String> studentIds = parseList(parts[7]);
 
-            return new Instructor(id, name, academyId, introduction, subject,
+            // 수강생 목록은 현재 데이터에 없으므로 빈 리스트
+            List<String> studentIds = new ArrayList<>();
+
+            // 프로필 이미지는 8번째 (index 7)
+            String profileImageFileName = parts.length > 7 ? parts[7].trim() : null;
+            String profileImagePath = null;
+            if (profileImageFileName != null && !profileImageFileName.isEmpty()) {
+                profileImagePath = "InstructorThumbnail/" + profileImageFileName;
+            }
+
+            Instructor instructor = new Instructor(id, name, academyId, introduction, subject,
                     textbookId, lectureIds, studentIds);
+
+            if (profileImagePath != null) {
+                instructor.setProfileImagePath(profileImagePath);
+            }
+
+            return instructor;
 
         } catch (Exception e) {
             System.err.println("Data parsing error: " + line);
-e.printStackTrace();
+            e.printStackTrace();
             return null;
         }
     }
@@ -178,15 +208,27 @@ e.printStackTrace();
      * @return `Instructor` 객체의 필드들을 조합한 한 줄 문자열
      */
     private String instructorToLine(Instructor instructor) {
+        // 프로필 이미지 경로에서 파일명만 추출
+        String profileImageFileName = "";
+        if (instructor.getProfileImagePath() != null) {
+            String path = instructor.getProfileImagePath();
+            // "src/main/resources/양승진.png" → "양승진.png"
+            int lastSlash = path.lastIndexOf("/");
+            if (lastSlash != -1) {
+                profileImageFileName = path.substring(lastSlash + 1);
+            }
+        }
+
         return String.join(FIELD_DELIMITER,
                 instructor.getId(),
                 instructor.getName(),
                 instructor.getAcademyId(),
                 instructor.getIntroduction(),
                 instructor.getSubject() != null ? instructor.getSubject() : "",
-                instructor.getTextbookId() != null ? instructor.getTextbookId() : "", // getTextbookId() 사용
+                instructor.getTextbookId() != null ? instructor.getTextbookId() : "",
                 listToString(instructor.getLectureIds()),
-                listToString(instructor.getStudentIds())
+                listToString(instructor.getStudentIds()),
+                profileImageFileName  // 파일명만 저장
         );
     }
 

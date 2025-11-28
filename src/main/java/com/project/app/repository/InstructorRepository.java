@@ -25,6 +25,7 @@ public interface InstructorRepository {
      * 모든 강사 목록 조회
      */
     List<Instructor> findAll();
+    List<Instructor> getAllInstructors();
 
     /**
      * 학원 ID로 소속 강사 목록 조회

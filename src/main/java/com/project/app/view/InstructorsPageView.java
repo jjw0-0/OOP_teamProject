@@ -1,9 +1,17 @@
 package com.project.app.view;
 
+import com.project.app.controller.InstructorController;
+import com.project.app.dto.InstructorCardView;
+import com.project.app.dto.InstructorDetailResponse;
+import com.project.app.dto.InstructorListResponse;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.*;
 import java.awt.*;
-
+import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
 /**
  * 강사 페이지 뷰
  *
@@ -14,6 +22,16 @@ public class InstructorsPageView extends JPanel {
 
     // 싱글톤 패턴: private static 인스턴스 변수
     private static InstructorsPageView instance;
+
+    static {
+        try {
+            // 스크롤바의 기본 너비를 10 픽셀로 설정
+            UIManager.put("ScrollBar.width", 10);
+            UIManager.put("ScrollBar.thumbWidth", 10);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * 싱글톤 인스턴스를 반환하는 메서드
@@ -32,7 +50,13 @@ public class InstructorsPageView extends JPanel {
     }
 
     // 싱글톤 패턴: private 생성자
+    private InstructorController controller;
+    private List<InstructorCardView> currentInstructors;
+
     private InstructorsPageView() {
+        this.controller = InstructorController.getInstance();
+        this.currentInstructors = new ArrayList<>();
+
         setPreferredSize(new Dimension(760, 600));
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBackground(Color.WHITE);
@@ -44,13 +68,52 @@ public class InstructorsPageView extends JPanel {
         JPanel wrapSearchBar = new RoundedPanel(13);
         wrapSearchBar.setMaximumSize(new Dimension(674, 29));
         wrapSearchBar.setBackground(Color.WHITE);
-        wrapSearchBar.setLayout(new BoxLayout(wrapSearchBar, BoxLayout.X_AXIS)); // 수평
+        wrapSearchBar.setLayout(new BoxLayout(wrapSearchBar, BoxLayout.X_AXIS));
         wrapSearchBar.add(Box.createHorizontalStrut(405));
         wrapSearchBar.add(setupSearchBar());
         add(wrapSearchBar);
 
         add(Box.createVerticalStrut(30));
+
+        // 초기 데이터 로드
+        loadInstructors(null);
+    }
+
+    /**
+     * 강사 목록 로드 및 UI 갱신
+     */
+    private void loadInstructors(String subject) {
+        InstructorListResponse response;
+        if (subject == null || subject.isEmpty()) {
+            response = controller.getAllInstructors();
+        } else {
+            response = controller.getInstructorsBySubject(subject);
+        }
+
+        this.currentInstructors = response.getInstructors();
+        refreshInstructorsList();
+    }
+
+    /**
+     * 강사 목록 UI 갱신
+     */
+    private void refreshInstructorsList() {
+        // 기존 강사 목록 패널 제거
+        Component[] components = getComponents();
+        for (Component comp : components) {
+            if (comp instanceof JPanel) {
+                JPanel panel = (JPanel) comp;
+                if (panel.getLayout() instanceof GridLayout) {
+                    remove(panel);
+                    break;
+                }
+            }
+        }
+
+        // 새로운 강사 목록 추가
         add(setupInstructorsList());
+        revalidate();
+        repaint();
     }
 
     JPanel setupInstructorsList() {
@@ -60,36 +123,45 @@ public class InstructorsPageView extends JPanel {
         instructorsList.setBorder(new EmptyBorder(8, 18, 8, 18));
         instructorsList.setBackground(Color.WHITE);
 
-        // 8개의 강사 카드 생성
-        for (int i = 0; i < 8; i++) {
-            instructorsList.add(Instructor());
+        // 실제 데이터로 강사 카드 생성 (최대 8개)
+        int count = Math.min(currentInstructors.size(), 8);
+        for (int i = 0; i < count; i++) {
+            instructorsList.add(Instructor(currentInstructors.get(i)));
+        }
+
+        // 8개 미만이면 빈 카드로 채우기
+        for (int i = count; i < 8; i++) {
+            JPanel emptyCard = new JPanel();
+            emptyCard.setBackground(new Color(0xF5F5F5));
+            instructorsList.add(emptyCard);
         }
 
         return instructorsList;
     }
 
-    JPanel Instructor() {
+    JPanel Instructor(InstructorCardView data) {
         JPanel instructorCard = new RoundedPanel(18);
         instructorCard.setMaximumSize(new Dimension(156, 176));
-        instructorCard.setLayout(new BoxLayout(instructorCard, BoxLayout.Y_AXIS)); // 수직정렬
+        instructorCard.setLayout(new BoxLayout(instructorCard, BoxLayout.Y_AXIS));
         instructorCard.setBackground(new Color(0xF5F5F5));
 
-        InstructorData data = new InstructorData();
-
         // 마우스 커서 및 이벤트 설정
-        instructorCard.setCursor(new Cursor(Cursor.HAND_CURSOR)); // 손가락 커서
+        instructorCard.setCursor(new Cursor(Cursor.HAND_CURSOR));
         instructorCard.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                // 강사 상세 팝업 표시
-                new InstructorDetailPopup(
-                    (JFrame) SwingUtilities.getWindowAncestor(InstructorsPageView.this),
-                    data
-                ).setVisible(true);
+                // 강사 상세 정보 조회
+                InstructorDetailResponse detailData = controller.getInstructorDetail(data.getId());
+                if (detailData != null) {
+                    new InstructorDetailPopup(
+                            (JFrame) SwingUtilities.getWindowAncestor(InstructorsPageView.this),
+                            detailData
+                    ).setVisible(true);
+                }
             }
 
             @Override
-            public void mouseEntered(java.awt.event.MouseEvent e) { // hover 효과
+            public void mouseEntered(java.awt.event.MouseEvent e) {
                 instructorCard.setBackground(new Color(0xE5E5E5));
             }
 
@@ -131,29 +203,100 @@ public class InstructorsPageView extends JPanel {
         return instructorCard;
     }
 
-    JPanel introPanel(InstructorData data) {
+    JPanel introPanel(InstructorCardView data) {
         JPanel introductionPanel = new JPanel();
-        introductionPanel.setMaximumSize(new Dimension(120, 46));
+        introductionPanel.setMaximumSize(new Dimension(150, 46));
         introductionPanel.setOpaque(false);
 
-        JLabel introduction = new JLabel(" " + data.Introduction);
+        String intro = data.getIntroduction();
+
+        JLabel introduction = new JLabel(intro);
         introduction.setFont(new Font("맑은 고딕", Font.BOLD, 15));
+
+        // FontMetrics로 실제 텍스트 너비 계산
+        FontMetrics fm = introduction.getFontMetrics(introduction.getFont());
+        int textWidth = fm.stringWidth(intro);
+        int maxWidth = 145; // 패널 너비보다 약간 작게
+
+        // 텍스트가 너비를 초과하면 잘라내기
+        if (textWidth > maxWidth) {
+            String ellipsis = "...";
+            int ellipsisWidth = fm.stringWidth(ellipsis);
+            int availableWidth = maxWidth - ellipsisWidth;
+
+            // 글자를 하나씩 줄여가며 맞는 길이 찾기
+            for (int i = intro.length() - 1; i > 0; i--) {
+                String shortened = intro.substring(0, i);
+                if (fm.stringWidth(shortened) <= availableWidth) {
+                    intro = shortened + ellipsis;
+                    break;
+                }
+            }
+            introduction.setText(intro);
+        }
 
         introductionPanel.add(introduction);
 
         return introductionPanel;
     }
 
-    static JLabel createImage(InstructorData data, int width, int height) {
-        ImageIcon imageIcon = data.getImage();
+    static JLabel createImage(InstructorCardView data, int width, int height) {
+        ImageIcon imageIcon;
+
+        System.out.println("=== 이미지 로드 디버깅 ===");
+        System.out.println("ProfileImagePath: " + data.getProfileImagePath());
+
+        if (data.getProfileImagePath() != null && !data.getProfileImagePath().isEmpty()) {
+            try {
+                String path = data.getProfileImagePath();
+                String fileName = path.substring(path.lastIndexOf("/") + 1);
+
+                System.out.println("파일명 추출: " + fileName);
+                String fullPath = "InstructorThumbnail/" + fileName;
+                System.out.println("최종 경로: " + fullPath);
+
+                java.net.URL imageURL = InstructorsPageView.class.getClassLoader()
+                        .getResource(fullPath);
+
+                System.out.println("URL 결과: " + imageURL);
+
+                if (imageURL != null) {
+                    imageIcon = new ImageIcon(imageURL);
+                    System.out.println("이미지 로드 성공!");
+                } else {
+                    System.err.println("이미지 파일을 찾을 수 없음: " + fullPath);
+                    imageIcon = getDefaultImage();
+                }
+            } catch (Exception e) {
+                System.err.println("이미지 로드 실패: " + e.getMessage());
+                e.printStackTrace();
+                imageIcon = getDefaultImage();
+            }
+        } else {
+            System.out.println("ProfileImagePath가 null 또는 비어있음");
+            imageIcon = getDefaultImage();
+        }
+
         Image scaledImage = imageIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
         ImageIcon scaledImageIcon = new ImageIcon(scaledImage);
 
         return new JLabel(scaledImageIcon);
     }
 
-    static JPanel setupName(InstructorData data) {
-        JLabel name = new JLabel(data.name);
+    static ImageIcon getDefaultImage() {
+        try {
+            java.net.URL imageURL = InstructorsPageView.class.getClassLoader().getResource("person.png");
+            if (imageURL != null) {
+                return new ImageIcon(imageURL);
+            }
+        } catch (Exception e) {
+            System.err.println("기본 이미지 로드 실패: " + e.getMessage());
+        }
+        return new ImageIcon();
+    }
+
+    static JPanel setupName(InstructorCardView data) {
+        JLabel name = new JLabel(data.getName());
         name.setFont(new Font("맑은 고딕", Font.BOLD, 18));
 
         JPanel namePanel = new JPanel();
@@ -165,14 +308,14 @@ public class InstructorsPageView extends JPanel {
         return namePanel;
     }
 
-    static JPanel createStar(InstructorData data) {
+    static JPanel createStar(InstructorCardView data) {
         JPanel starPanel = new JPanel();
         starPanel.setLayout(new BoxLayout(starPanel, BoxLayout.X_AXIS));
         starPanel.setMaximumSize(new Dimension(60, 40));
         starPanel.setOpaque(false);
 
         JLabel star = new JLabel("<html><font color='#FFD700'>⭐</font>" +
-                " <font color='black'>" + data.star + "</font></html>");
+                " <font color='black'>" + String.format("%.1f", data.getReviewScore()) + "</font></html>");
         star.setFont(new Font("Segoe UI Emoji", Font.BOLD, 18));
         starPanel.add(star);
 
@@ -194,6 +337,17 @@ public class InstructorsPageView extends JPanel {
         searchButton.setMaximumSize(new Dimension(26, 26));
         searchButton.setBackground(new Color(0x0C4A6E));
         searchButton.setFocusPainted(false);
+
+        // 검색 버튼 클릭 이벤트
+        searchButton.addActionListener(e -> {
+            String keyword = searchField.getText().trim();
+            if (!keyword.isEmpty()) {
+                InstructorListResponse response = controller.searchInstructors(keyword);
+                currentInstructors = response.getInstructors();
+                refreshInstructorsList();
+            }
+        });
+
         searchPanel.add(searchButton, BorderLayout.EAST);
 
         return searchPanel;
@@ -218,179 +372,178 @@ public class InstructorsPageView extends JPanel {
     JPanel createSubjectPanel(String text) {
         JLabel subjectName = new JLabel(text);
         subjectName.setFont(new Font("맑은 고딕", Font.BOLD, 16));
-        subjectName.setHorizontalAlignment(JLabel.CENTER); // 수평 가운데
-        subjectName.setVerticalAlignment(JLabel.CENTER); // 수직 가운데
+        subjectName.setHorizontalAlignment(JLabel.CENTER);
+        subjectName.setVerticalAlignment(JLabel.CENTER);
 
         JPanel subjectPanel = new RoundedPanel(8, 1, new Color(0x1E6EA0));
         subjectPanel.setLayout(new BorderLayout());
         subjectPanel.setMaximumSize(new Dimension(92, 60));
         subjectPanel.setPreferredSize(new Dimension(92, 60));
-        subjectPanel.setBackground(Color.RED);
+        subjectPanel.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        subjectPanel.add(subjectName); // 과목이름
+        subjectPanel.add(subjectName);
         subjectPanel.setBackground(Color.WHITE);
 
-        return subjectPanel;
-    }
-
-    static JScrollPane createScrollPane(JPanel panel, int width, int height) {
-        JScrollPane scrollPane = new JScrollPane(panel);
-        scrollPane.setMaximumSize(new Dimension(width, height));
-        scrollPane.setPreferredSize(new Dimension(width, height));
-        scrollPane.setBorder(null);
-        // 필요할 때만 스크롤
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        return scrollPane;
-    }
-
-    // ========== 내부 클래스: InstructorData ==========
-
-    static class InstructorData {
-        String Introduction = "고등 수학의 정석";
-        String imagepath = "src/main/java/com/project/app/view/Instructors/Person.png";
-        String name = "김선생";
-        String subject = "수학";
-        double star = 4.8;
-
-        String[] lectureList = {"고등 수학 I", "수학 II", "미적분 심화"};
-
-        public String getIntroduction() {
-            return Introduction;
-        }
-
-        public ImageIcon getImage() {
-            // resources 폴더에서 이미지 로드
-            try {
-                java.net.URL imageURL = getClass().getClassLoader().getResource("person.png");
-                if (imageURL != null) {
-                    return new ImageIcon(imageURL);
-                }
-            } catch (Exception e) {
-                System.err.println("이미지 로드 실패: " + e.getMessage());
+        // 과목 버튼 클릭 이벤트
+        subjectPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                loadInstructors(text);
             }
-            // 실패 시 빈 ImageIcon 반환
-            return new ImageIcon();
-        }
 
-        public String getName() {
-            return name;
-        }
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                subjectPanel.setBackground(new Color(0xE5E5E5));
+            }
 
-        public double getStar() {
-            return star;
-        }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                subjectPanel.setBackground(Color.WHITE);
+            }
+        });
 
-        public String[] getLectureList() {
-            return lectureList;
-        }
+        return subjectPanel;
     }
 
     // ========== 내부 클래스: InstructorDetailPopup ==========
 
     static class InstructorDetailPopup extends JDialog {
-        public InstructorDetailPopup(JFrame page, InstructorData data) {
-            super(page, "강사 세부 정보", true); // 팝업창 초기화, 제목, 모달
+        public InstructorDetailPopup(JFrame page, InstructorDetailResponse data) {
+            super(page, "강사 세부 정보", true);
             setSize(600, 500);
             setLocationRelativeTo(page);
-            setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE); // 창 닫으면 메모리 해제
+            setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
             setResizable(false);
 
             setupInstructorDetailPopup(data);
         }
 
-        void setupInstructorDetailPopup(InstructorData data) {
-            JPanel popupPanel = new JPanel(new BorderLayout(20, 0)); // 좌우 간격 20
-            popupPanel.setBorder(new EmptyBorder(20,20,20,20));
+        void setupInstructorDetailPopup(InstructorDetailResponse data) {
+            // BorderLayout 대신 null layout 사용
+            JPanel popupPanel = new JPanel(null);
             popupPanel.setBackground(Color.WHITE);
             setContentPane(popupPanel);
 
-            // 프로필 + 강의평
-            JPanel profileAndReview = new JPanel();
-            profileAndReview.setLayout(new BoxLayout(profileAndReview, BoxLayout.Y_AXIS)); // 수직정렬
-            profileAndReview.setAlignmentY(Component.TOP_ALIGNMENT);
-            profileAndReview.setOpaque(false);
+            // 프로필 (왼쪽 상단)
+            JPanel profilePanel = setupProfile(data);
+            profilePanel.setBounds(20, 20, 160, 180);
+            popupPanel.add(profilePanel);
 
-            profileAndReview.add(setupProfile(data));
-            profileAndReview.add(Box.createVerticalStrut(10));
-            profileAndReview.add(setupReviews(data));
-            profileAndReview.add(Box.createVerticalGlue());
+            // 강의평 (왼쪽 하단)
+            JPanel reviewPanel = setupReviews(data);
+            reviewPanel.setBounds(20, 210, 160, 230);
+            popupPanel.add(reviewPanel);
 
-            popupPanel.add(profileAndReview,BorderLayout.WEST);
+            // 강의소개 내용 (오른쪽 상단)
+            JTextPane introPane = new JTextPane();
+            introPane.setText(data.getIntroduction());
+            introPane.setFont(new Font("맑은 고딕", Font.BOLD, 18));
+            introPane.setEditable(false);
+            introPane.setFocusable(false);
+            introPane.setBackground(new Color(0xF5F5F5));
+            introPane.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+            StyledDocument doc = introPane.getStyledDocument();
+            SimpleAttributeSet center = new SimpleAttributeSet();
+            StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
+            doc.setParagraphAttributes(0, doc.getLength(), center, false);
+
+            introPane.setBounds(200, 30, 350, 80);
+            popupPanel.add(introPane);
+
+            // 강의목록 제목 (2번째 이미지처럼 아래쪽)
+            JLabel lectureTitle = new JLabel("강의목록");
+            lectureTitle.setFont(new Font("맑은 고딕", Font.BOLD, 24));
+            lectureTitle.setBounds(200, 150, 100, 30);
+            popupPanel.add(lectureTitle);
 
             // 강의목록
-            JPanel wrapPanel = new JPanel();
-            wrapPanel.setLayout(new BoxLayout(wrapPanel, BoxLayout.Y_AXIS));
-            wrapPanel.setAlignmentY(Component.TOP_ALIGNMENT);
-            wrapPanel.add(Box.createVerticalStrut(80));
-            wrapPanel.setOpaque(false);
-
-            JPanel titlePanel = new JPanel();
-            titlePanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-            titlePanel.setMaximumSize(new Dimension(387, 40));
-            titlePanel.setOpaque(false);
-            titlePanel.add(new JLabel("강의목록") {{
-                setFont(new Font("맑은 고딕", Font.BOLD, 24));
-            }});
-
-            wrapPanel.add(titlePanel);
-
             JPanel wrapLecturesPanel = new JPanel();
             wrapLecturesPanel.setLayout(new BoxLayout(wrapLecturesPanel, BoxLayout.Y_AXIS));
             wrapLecturesPanel.setBackground(new Color(0xEEEEEE));
-
             wrapLecturesPanel.add(Box.createVerticalStrut(8));
 
-            for (String lectureName : data.lectureList) {
-                wrapLecturesPanel.add(createLecturePanel(data, lectureName));
+            for (InstructorDetailResponse.LectureSummary lecture : data.getLectures()) {
+                wrapLecturesPanel.add(createLecturePanel(lecture));
                 wrapLecturesPanel.add(Box.createVerticalStrut(5));
             }
 
-            JScrollPane scrollPane = InstructorsPageView.createScrollPane(wrapLecturesPanel, 387, 284);
-            wrapPanel.add(scrollPane);
-
-            popupPanel.add(wrapPanel,BorderLayout.CENTER);
+            JScrollPane scrollPane = InstructorsPageView.createScrollPane(wrapLecturesPanel, 360, 180);
+            scrollPane.setBounds(200, 190, 360, 230);
+            popupPanel.add(scrollPane);
         }
 
-        JPanel createLecturePanel(InstructorData data, String lectureName) {
+        JPanel createLecturePanel(InstructorDetailResponse.LectureSummary lecture) {
             JPanel lecturePanel = new JPanel();
             lecturePanel.setMaximumSize(new Dimension(352, 31));
             lecturePanel.setBackground(Color.WHITE);
 
-            lecturePanel.add(new JLabel(lectureName) {{
+            lecturePanel.add(new JLabel(lecture.getName()) {{
                 setFont(new Font("맑은 고딕", Font.BOLD, 18));
             }});
-            lecturePanel.add(InstructorsPageView.createStar(data));
+
+            // 별점 표시
+            JPanel starPanel = new JPanel();
+            starPanel.setLayout(new BoxLayout(starPanel, BoxLayout.X_AXIS));
+            starPanel.setOpaque(false);
+            JLabel star = new JLabel("<html><font color='#FFD700'>⭐</font>" +
+                    " <font color='black'>" + String.format("%.1f", lecture.getReviewScore()) + "</font></html>");
+            star.setFont(new Font("Segoe UI Emoji", Font.BOLD, 18));
+            starPanel.add(star);
+
+            lecturePanel.add(starPanel);
 
             return lecturePanel;
         }
 
-        JPanel setupProfile(InstructorData data) {
+        JPanel setupProfile(InstructorDetailResponse data) {
             JPanel profile = new JPanel();
             profile.setLayout(new BoxLayout(profile, BoxLayout.Y_AXIS));
             profile.setMaximumSize(new Dimension(160, 180));
             profile.setPreferredSize(new Dimension(160,180));
             profile.setOpaque(false);
 
-            JLabel imageLabel = InstructorsPageView.createImage(data, 138, 138);
+            /// 이미지
+            ImageIcon imageIcon = getDefaultImage();
+            if (data.getProfileImagePath() != null && !data.getProfileImagePath().isEmpty()) {
+                try {
+                    String path = data.getProfileImagePath();
+                    String fileName = path.substring(path.lastIndexOf("/") + 1);
+
+                    java.net.URL imageURL = InstructorsPageView.class.getClassLoader()
+                            .getResource("InstructorThumbnail/" + fileName);
+                    if (imageURL != null) {
+                        imageIcon = new ImageIcon(imageURL);
+                    }
+                } catch (Exception e) {
+                    // 기본 이미지 사용
+                }
+            }
+            Image scaledImage = imageIcon.getImage().getScaledInstance(138, 138, Image.SCALE_SMOOTH);
+            JLabel imageLabel = new JLabel(new ImageIcon(scaledImage));
+
             JPanel imagePanel = new JPanel();
-            imagePanel.setOpaque(false); // 사진 배경 투명하게
+            imagePanel.setOpaque(false);
             imagePanel.add(imageLabel);
 
             profile.add(imagePanel);
 
             JPanel namePanel = new JPanel();
             namePanel.setOpaque(false);
-            JLabel subjectInfo = new JLabel("[" + data.subject + "]");
+            JLabel subjectInfo = new JLabel("[" + data.getSubject() + "]");
             subjectInfo.setFont(new Font("맑은 고딕", Font.BOLD, 18));
             namePanel.add(subjectInfo);
-            namePanel.add(InstructorsPageView.setupName(data));
+
+            JLabel name = new JLabel(data.getName());
+            name.setFont(new Font("맑은 고딕", Font.BOLD, 18));
+            namePanel.add(name);
+
             profile.add(namePanel);
 
             return profile;
         }
 
-        JPanel setupReviews(InstructorData data) {
+        JPanel setupReviews(InstructorDetailResponse data) {
             JPanel starRating = new JPanel();
             starRating.setOpaque(false);
             starRating.setLayout(new BorderLayout(0,3));
@@ -405,19 +558,105 @@ public class InstructorsPageView extends JPanel {
             reviewPanel.setOpaque(false);
 
             reviewPanel.add(reviewLabel);
-            reviewPanel.add(InstructorsPageView.createStar(data));
 
-            starRating.add(reviewPanel,BorderLayout.NORTH); // 상단에 고정
+            // 평점 표시
+            JPanel starPanel = new JPanel();
+            starPanel.setOpaque(false);
+            JLabel star = new JLabel("<html><font color='#FFD700'>⭐</font>" +
+                    " <font color='black'>" + String.format("%.1f", data.getReviewScore()) + "</font></html>");
+            star.setFont(new Font("Segoe UI Emoji", Font.BOLD, 18));
+            starPanel.add(star);
+            reviewPanel.add(starPanel);
 
+            starRating.add(reviewPanel,BorderLayout.NORTH);
 
-            JPanel reviews = new JPanel();
-            reviews.setLayout(new BoxLayout(reviews, BoxLayout.Y_AXIS));
-            reviews.setBackground(new Color(0xEEEEEE));
+            JPanel reviewsListContainer = new JPanel();
+            reviewsListContainer.setLayout(new BoxLayout(reviewsListContainer, BoxLayout.Y_AXIS));
+            reviewsListContainer.setBackground(new Color(0xEEEEEE));
 
-            starRating.add(reviews,BorderLayout.CENTER);
+            // 1. **더미 데이터 리스트** 정의 (실제 DTO 구현 시 대체 필요)
+            // 강사 ID I031(김현수쌤)의 리뷰와 다른 강사 리뷰 일부를 사용합니다.
+            String rawReviews =
+                    "I031/R098/user002/개념 설명 명쾌하고 JUST THIS 교재 최고!\n" +
+                            "I031/R099/user008/생윤 강의 듣고 3등급에서 1등급 됐어요\n" +
+                            "I031/R100/user027/설명 체계적이고 이해하기 쉬워요\n" +
+                            "I031/R101/user029/사문 김현수쌤이 최고예요\n" +
+                            "I001/R001/user005/유형 분석 체계적이고 실전 적용 가능해요\n" +
+                            "I002/R005/user008/개념과 문풀 간극 메워주는 강의!\n" +
+                            "I002/R006/user012/수학 본질 이해하게 해주세요";
+
+            String[] lines = rawReviews.split("\n");
+
+            // 2. 데이터 수만큼 리뷰 패널 생성 및 추가
+            for (String line : lines) {
+                String[] parts = line.split("/");
+                if (parts.length >= 4) {
+                    String userId = parts[2];
+                    String content = parts[3];
+
+                    reviewsListContainer.add(Box.createVerticalStrut(5));
+                    // createReviewPanel 호출하여 리뷰 카드 생성 및 추가
+                    reviewsListContainer.add(createReviewPanel(userId, content));
+                }
+            }
+            reviewsListContainer.add(Box.createVerticalStrut(5));
+
+            // 3. 스크롤 패널로 감싸서 starRating의 CENTER에 추가
+            // InstructorsPageView 클래스에 있는 static createScrollPane 메서드를 사용해야 합니다.
+            JScrollPane scrollPane = InstructorsPageView.createScrollPane(reviewsListContainer, 160, 230);
+            scrollPane.setPreferredSize(new Dimension(160, 230));
+            scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+            starRating.add(scrollPane, BorderLayout.CENTER);
+            // ----------------------------------------------------------------------
 
             return starRating;
         }
+        /**
+         * 단일 강의평 (리뷰) 카드 패널을 생성하여 반환 (레이아웃 관리자 사용)
+         * (InstructorDetailPopup 클래스 내부 메서드)
+         */
+        JPanel createReviewPanel(String userId, String content) {
+            JPanel reviewPanel = new RoundedPanel(8);
+            reviewPanel.setMaximumSize(new Dimension(155, 65));
+            reviewPanel.setPreferredSize(new Dimension(155, 65));
+            // BorderLayout을 사용하여 NORTH에 유저 ID, CENTER에 리뷰 내용을 배치
+            reviewPanel.setLayout(new BorderLayout(5, 2)); // 수평 5, 수직 2 간격
+            reviewPanel.setBackground(Color.WHITE);
+            reviewPanel.setBorder(new EmptyBorder(5, 5, 5, 5)); // 내부 여백
+
+            // 1. 유저 ID (NORTH)
+            JPanel userPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+            userPanel.setOpaque(false);
+            JLabel userLabel = new JLabel(userId);
+            userLabel.setFont(new Font("맑은 고딕", Font.BOLD, 12));
+            userPanel.add(userLabel);
+            reviewPanel.add(userPanel, BorderLayout.NORTH);
+
+            // 2. 리뷰 내용 (CENTER)
+            JTextPane contentPane = new JTextPane();
+            contentPane.setText(content);
+            contentPane.setFont(new Font("맑은 고딕", Font.PLAIN, 11));
+            contentPane.setEditable(false);
+            contentPane.setFocusable(false);
+            contentPane.setBackground(Color.WHITE);
+
+            // JTextPane을 CENTER에 배치하면 남은 공간을 모두 차지합니다.
+            reviewPanel.add(contentPane, BorderLayout.CENTER);
+
+            return reviewPanel;
+        }
+    }
+
+    static JScrollPane createScrollPane(JPanel panel, int width, int height) {
+        JScrollPane scrollPane = new JScrollPane(panel);
+        scrollPane.setMaximumSize(new Dimension(width, height));
+        scrollPane.setPreferredSize(new Dimension(width, height));
+        scrollPane.setBorder(null);
+        // 필요할 때만 스크롤
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        return scrollPane;
     }
 
     // ========== 내부 클래스: RoundedPanel ==========
