@@ -1,6 +1,12 @@
 package com.project.app.view;
 
 import javax.swing.*;
+
+import com.project.app.controller.LoginController;
+import com.project.app.repository.UserRepository;
+import com.project.app.repository.UserRepositoryImpl;
+import com.project.app.service.SignInService;
+
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
@@ -66,11 +72,11 @@ public class SidePanel extends JFrame {
 
         // 색상 관련 상수
         static final Color BACKGROUND_COLOR = new Color(26, 90, 107);
-        static final Color PRIMARY_COLOR = new Color(26, 90, 107);   
+        static final Color PRIMARY_COLOR = new Color(26, 90, 107);
         static final Color SECONDARY_COLOR = new Color(96, 125, 139);
         static final Color SELECTED_COLOR = new Color(96, 125, 139);
         static final Color TEXT_COLOR = Color.WHITE;
-        static final Color HOVER_COLOR = new Color(69, 112, 125);      // 호버 시 색상
+        static final Color HOVER_COLOR = new Color(69, 112, 125); // 호버 시 색상
 
         // 폰트 관련 상수
         static final Font LOGO_FONT = new Font("맑은 고딕", Font.BOLD, 22);
@@ -122,12 +128,12 @@ public class SidePanel extends JFrame {
 
     // ======================== 인스턴스 변수 ========================
 
-    private JPanel sideMenuPanel;  // 좌측 메뉴 패널
-    private JPanel contentPanel;   // 우측 콘텐츠 영역
+    private JPanel sideMenuPanel; // 좌측 메뉴 패널
+    private JPanel contentPanel; // 우측 콘텐츠 영역
 
-    private MenuItem selectedItem;  // 현재 선택된 메뉴 항목
-    private Map<MenuItem, JButton> menuButtons;  // 메뉴 항목과 버튼 매핑
-    private Map<MenuItem, ActionListener> menuListeners;  // 각 메뉴의 액션 리스너
+    private MenuItem selectedItem; // 현재 선택된 메뉴 항목
+    private Map<MenuItem, JButton> menuButtons; // 메뉴 항목과 버튼 매핑
+    private Map<MenuItem, ActionListener> menuListeners; // 각 메뉴의 액션 리스너
 
     // ======================== 생성자 ========================
 
@@ -146,13 +152,28 @@ public class SidePanel extends JFrame {
     private SidePanel() {
         menuButtons = new HashMap<>();
         menuListeners = new HashMap<>();
-        selectedItem = MenuItem.MYPAGE;  // 기본 선택: 마이페이지
+        selectedItem = MenuItem.MYPAGE; // 기본 선택: 마이페이지
 
         initializeFrame();
         createUI();
-        setupDefaultMenuListeners();  // 기본 메뉴 리스너 설정
-        showContent(MyPageView.getInstance());  // 초기 콘텐츠: 마이페이지
+        setupDefaultMenuListeners(); // 기본 메뉴 리스너 설정
+        initializeControllers();
+        showContent(MyPageView.getInstance()); // 초기 콘텐츠: 마이페이지
         setVisible(true);
+    }
+
+    /**
+     * 모든 Controller 초기화
+     */
+    private void initializeControllers() {
+        // Repository와 Service 생성
+        UserRepository userRepository = new UserRepositoryImpl();
+        SignInService signInService = new SignInService(userRepository);
+
+        // LoginController 생성 (생성자에서 자동으로 리스너 등록됨)
+        new LoginController(SignInView.getInstance(), signInService);
+
+        System.out.println("LoginController 초기화 완료");
     }
 
     /**
@@ -170,9 +191,10 @@ public class SidePanel extends JFrame {
         setTitle("일타강사");
         setSize(StyleConstants.FRAME_WIDTH, StyleConstants.FRAME_HEIGHT);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);  // 화면 중앙에 배치
-        setResizable(false);  // 크기 조절 비활성화
+        setLocationRelativeTo(null); // 화면 중앙에 배치
+        setResizable(false); // 크기 조절 비활성화
         setLayout(new BorderLayout());
+        
     }
 
     // ======================== UI 생성 메서드 ========================
@@ -194,7 +216,7 @@ public class SidePanel extends JFrame {
 
         // 우측: 콘텐츠 영역 생성 및 추가
         contentPanel = new JPanel();
-        contentPanel.setBackground(new Color(245, 245, 245));  // 연한 회색 배경
+        contentPanel.setBackground(new Color(245, 245, 245)); // 연한 회색 배경
         add(contentPanel, BorderLayout.CENTER);
     }
 
@@ -230,11 +252,11 @@ public class SidePanel extends JFrame {
 
         // 주요 메뉴 아이템: HOME, LECTURE, INSTRUCTOR, MYPAGE, HELP
         MenuItem[] mainMenuItems = {
-            MenuItem.HOME,
-            MenuItem.LECTURE,
-            MenuItem.INSTRUCTOR,
-            MenuItem.MYPAGE,
-            MenuItem.HELP
+                MenuItem.HOME,
+                MenuItem.LECTURE,
+                MenuItem.INSTRUCTOR,
+                MenuItem.MYPAGE,
+                MenuItem.HELP
         };
 
         for (int i = 0; i < mainMenuItems.length; i++) {
@@ -269,12 +291,12 @@ public class SidePanel extends JFrame {
         JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.Y_AXIS));
         bottomPanel.setBackground(StyleConstants.BACKGROUND_COLOR);
-        bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));  // 상하 여백
+        bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0)); // 상하 여백
 
         // 인증 메뉴 아이템: LOGIN, SIGNUP
         MenuItem[] authMenuItems = {
-            MenuItem.LOGIN,
-            MenuItem.SIGNUP
+                MenuItem.LOGIN,
+                MenuItem.SIGNUP
         };
 
         for (int i = 0; i < authMenuItems.length; i++) {
@@ -398,10 +420,9 @@ public class SidePanel extends JFrame {
             if (iconURL != null) {
                 ImageIcon originalIcon = new ImageIcon(iconURL);
                 Image scaledImage = originalIcon.getImage().getScaledInstance(
-                    StyleConstants.ICON_SIZE,
-                    StyleConstants.ICON_SIZE,
-                    Image.SCALE_SMOOTH
-                );
+                        StyleConstants.ICON_SIZE,
+                        StyleConstants.ICON_SIZE,
+                        Image.SCALE_SMOOTH);
                 return new ImageIcon(scaledImage);
             }
         } catch (Exception e) {
@@ -424,9 +445,8 @@ public class SidePanel extends JFrame {
         JPanel logoPanel = new JPanel();
         logoPanel.setBackground(StyleConstants.BACKGROUND_COLOR);
         logoPanel.setMaximumSize(new Dimension(
-            StyleConstants.PANEL_WIDTH,
-            StyleConstants.LOGO_HEIGHT
-        ));
+                StyleConstants.PANEL_WIDTH,
+                StyleConstants.LOGO_HEIGHT));
         logoPanel.setLayout(new BorderLayout());
         logoPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 0, 0));
 
@@ -470,25 +490,20 @@ public class SidePanel extends JFrame {
         button.setFont(StyleConstants.MENU_FONT);
         button.setForeground(StyleConstants.TEXT_COLOR);
         button.setBackground(
-            item == selectedItem ?
-            StyleConstants.SELECTED_COLOR :
-            StyleConstants.BACKGROUND_COLOR
-        );
+                item == selectedItem ? StyleConstants.SELECTED_COLOR : StyleConstants.BACKGROUND_COLOR);
         button.setFocusPainted(false);
         button.setBorderPainted(false);
         button.setHorizontalAlignment(SwingConstants.LEFT);
         button.setMaximumSize(new Dimension(
-            StyleConstants.PANEL_WIDTH,
-            StyleConstants.BUTTON_HEIGHT
-        ));
+                StyleConstants.PANEL_WIDTH,
+                StyleConstants.BUTTON_HEIGHT));
         button.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         button.setBorder(BorderFactory.createEmptyBorder(
-            StyleConstants.PADDING_VERTICAL,
-            StyleConstants.PADDING_HORIZONTAL,
-            StyleConstants.PADDING_VERTICAL,
-            StyleConstants.PADDING_HORIZONTAL
-        ));
+                StyleConstants.PADDING_VERTICAL,
+                StyleConstants.PADDING_HORIZONTAL,
+                StyleConstants.PADDING_VERTICAL,
+                StyleConstants.PADDING_HORIZONTAL));
 
         // 마우스 호버 효과
         button.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -544,8 +559,7 @@ public class SidePanel extends JFrame {
         ActionListener listener = menuListeners.get(item);
         if (listener != null) {
             listener.actionPerformed(
-                new java.awt.event.ActionEvent(this, java.awt.event.ActionEvent.ACTION_PERFORMED, item.name())
-            );
+                    new java.awt.event.ActionEvent(this, java.awt.event.ActionEvent.ACTION_PERFORMED, item.name()));
         }
     }
 
@@ -585,7 +599,7 @@ public class SidePanel extends JFrame {
      * - 외부(Controller)에서 메뉴 클릭 이벤트를 처리할 수 있도록 함
      * - View와 Controller의 분리를 지원
      *
-     * @param item 메뉴 항목
+     * @param item     메뉴 항목
      * @param listener 실행할 액션 리스너
      */
     public void setMenuListener(MenuItem item, ActionListener listener) {

@@ -34,9 +34,9 @@ public class SignInView extends JPanel {
     private JButton signupBtn;
 
     // 폰트 상수
-    private static final Font TITLE_FONT = new Font("Inknut Antiqua", Font.BOLD, 24);
-    private static final Font EN_LABEL_FONT = new Font("Inknut Antiqua", Font.BOLD, 16);
-    private static final Font EN_INPUT_FONT = new Font("Inknut Antiqua", Font.PLAIN, 16);
+    private static final Font TITLE_FONT = new Font(" 맑은 고딕", Font.BOLD, 24);
+    private static final Font EN_LABEL_FONT = new Font("맑은 고딕", Font.BOLD, 16);
+    private static final Font EN_INPUT_FONT = new Font("맑은 고딕", Font.PLAIN, 16);
     private static final Font KO_BUTTON_FONT = new Font("맑은 고딕", Font.BOLD, 16);
     private static final Font KO_SUB_FONT = new Font("맑은 고딕", Font.PLAIN, 14);
 
