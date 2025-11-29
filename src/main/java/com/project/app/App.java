@@ -68,9 +68,10 @@ public class App {
                 // 3. View 인스턴스 생성
                 InstructorsPageView instructorsPageView = InstructorsPageView.getInstance();
                 
-                // 4. Controller 인스턴스 생성 및 연결
+                // 4. Controller 인스턴스 생성 및 연결 (LectureService도 주입)
                 InstructorController instructorController = new InstructorController(
                     instructorService,
+                    lectureService,
                     instructorsPageView
                 );
                 

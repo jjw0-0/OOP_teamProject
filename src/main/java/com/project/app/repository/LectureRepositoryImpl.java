@@ -54,7 +54,7 @@ public class LectureRepositoryImpl implements LectureRepository{
                 String thumbnailPath = "";
                 if (parts.length >= 18 && !parts[17].trim().isEmpty()) {
                     String thumbnailFileName = parts[17].trim();
-                    thumbnailPath = "src/main/resources/LectureImages/" + thumbnailFileName;
+                    thumbnailPath = "src/main/resources/lectureThumbnail/" + thumbnailFileName;
                 }
 
                 Lecture lecture = new Lecture(

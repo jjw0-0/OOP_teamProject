@@ -506,7 +506,7 @@ public class InstructorsPageView extends JPanel {
             parentFrame = (JFrame) parentWindow;
         }
         
-        new InstructorDetailPopup(parentFrame, detail).setVisible(true);
+        new InstructorDetailPopup(parentFrame, detail, controller).setVisible(true);
     }
 
     /**
@@ -556,8 +556,11 @@ public class InstructorsPageView extends JPanel {
     // ========== 내부 클래스: InstructorDetailPopup ==========
 
     static class InstructorDetailPopup extends JDialog {
-        public InstructorDetailPopup(JFrame page, InstructorDetailResponse detail) {
+        private final InstructorController controller;
+        
+        public InstructorDetailPopup(JFrame page, InstructorDetailResponse detail, InstructorController controller) {
             super(page, "강사 세부 정보", true);
+            this.controller = controller;
             setSize(600, 500);
             if (page != null) {
                 setLocationRelativeTo(page);
@@ -639,11 +642,32 @@ public class InstructorsPageView extends JPanel {
             lecturePanel.setLayout(new BorderLayout());
             lecturePanel.setMaximumSize(new Dimension(352, 31));
             lecturePanel.setBackground(Color.WHITE);
+            lecturePanel.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-            // 강의명 (왼쪽 정렬)
+            // 강의명 (왼쪽 정렬) - 클릭 가능하도록 설정
             JLabel nameLabel = new JLabel(InstructorsPageView.truncateWithEllipsis(" "+lecture.getName(), 25));
             nameLabel.setFont(new Font("맑은 고딕", Font.BOLD, 18));
             nameLabel.setHorizontalAlignment(SwingConstants.LEFT);
+            nameLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            nameLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    // Controller를 통해 강의 상세 정보 표시
+                    if (controller != null) {
+                        controller.showLectureDetail(lecture.getId());
+                    }
+                }
+                
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    nameLabel.setForeground(new Color(30, 110, 160));
+                }
+                
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    nameLabel.setForeground(Color.BLACK);
+                }
+            });
             lecturePanel.add(nameLabel, BorderLayout.WEST);
 
             // 별점 (오른쪽 정렬)
