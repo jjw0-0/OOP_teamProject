@@ -298,6 +298,18 @@ public class Lecture {
         );
     }
 
+    // 예: L001 → 1, M010 → 10
+    public int getId() {
+        if (lectureId == null) return 0;
+        String digits = lectureId.replaceAll("\\D", "");
+        if (digits.isEmpty()) return 0;
+        try {
+            return Integer.parseInt(digits);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
     /**
      * 상세 정보 문자열
      */
