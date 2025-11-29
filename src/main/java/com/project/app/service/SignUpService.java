@@ -3,30 +3,24 @@ package com.project.app.service;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Calendar;
 
 /**
- * 회원가입 비즈니스 로직을 처리하는 서비스 클래스
+ * 회원가입 비즈니스 로직
  *
- * 기능:
- * - 회원가입 입력값 검증 (필수 입력, 비밀번호 규칙, ID 중복 체크 등)
- * - users.txt 파일에 사용자 정보 저장
- * - 날짜 계산 유틸리티 제공 (윤년 처리 등)
- *
- * 주요 내용:
- * 1. handleSignUp: 모든 입력값 검증 후 파일에 저장
- * 2. isDuplicateId: users.txt를 읽어 ID 중복 확인
- * 3. getDaysInMonth: 월별 날짜 수 계산 (윤년 고려)
+ * - UserData.txt에 사용자 정보를 추가
+ * - 형식: 사용자ID/비밀번호/이름/생년월일/학년/신청강의목록/결제내역목록
  */
 public class SignUpService {
 
-    /**
-     * 회원가입 처리 메서드
-     *
-     * @param parent 부모 컴포넌트 (메시지 다이얼로그 표시용, JPanel 또는 JFrame 모두 가능)
-     */
+    private static final String USER_DATA_FILE = "UserData.txt";
+
+    // 회원가입 처리 메서드
     public void handleSignUp(JTextField tfId, JPasswordField pfPw, JTextField tfName,
                              JComboBox<Integer> cbYear, JComboBox<Integer> cbMonth, JComboBox<Integer> cbDay,
                              Component parent) {
+
         String name = tfName.getText().trim();
         String id = tfId.getText().trim();
         String password = new String(pfPw.getPassword()).trim();
@@ -58,15 +52,45 @@ public class SignUpService {
         int day = (int) cbDay.getSelectedItem();
         String birth = String.format("%04d-%02d-%02d", year, month, day);
 
+        // 생년월일 기준 학년 자동 계산 (정수)
+        int gradeInt = calculateGradeFromBirth(year, month, day);
+        String gradeLabel = gradeIntToLabel(gradeInt);  // "고1" / "고2" / ...
+
+        // ID 중복 체크 (UserData.txt 기준)
         if (isDuplicateId(id)) {
             JOptionPane.showMessageDialog(parent, "이미 존재하는 아이디입니다.", "중복 오류", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("users.txt", true))) {
-            writer.write(id + "," + password + "," + name + "," + birth);
+        // ★ UserData.txt 파일에 저장
+        File file = new File(USER_DATA_FILE);
+        boolean needHeader = !file.exists() || file.length() == 0;
+
+        try (BufferedWriter writer = new BufferedWriter(
+                new OutputStreamWriter(new FileOutputStream(file, true), StandardCharsets.UTF_8))) {
+
+            if (needHeader) {
+                writer.write("사용자ID/비밀번호/이름/생년월일/학년/신청강의목록/결제내역목록");
+                writer.newLine();
+            }
+
+            // 처음 회원가입 시 신청강의목록, 결제내역목록은 비워둠 ("", "")
+            String enrolledLectures = "";
+            String paymentIds = "";
+
+            String line = String.join("/",
+                    id,
+                    password,
+                    name,
+                    birth,
+                    gradeLabel,
+                    enrolledLectures,
+                    paymentIds
+            );
+            writer.write(line);
             writer.newLine();
         } catch (IOException ex) {
+            ex.printStackTrace();
             JOptionPane.showMessageDialog(parent, "회원정보 저장 중 오류가 발생했습니다.", "파일 오류", JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -76,44 +100,52 @@ public class SignUpService {
     }
 
     public boolean isDuplicateId(String id) {
-        try (BufferedReader reader = new BufferedReader(new FileReader("users.txt"))) {
+        File file = new File(USER_DATA_FILE);
+        if (!file.exists()) {
+            return false;
+        }
+
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
+
             String line;
+            boolean first = true;
             while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length > 0 && parts[0].equals(id)) return true;
+                line = line.trim();
+                if (line.isEmpty()) continue;
+
+                // 헤더 스킵
+                if (first) {
+                    first = false;
+                    if (line.startsWith("사용자ID")) {
+                        continue;
+                    }
+                }
+
+                String[] parts = line.split("/");
+                if (parts.length > 0 && parts[0].trim().equals(id)) {
+                    return true;
+                }
             }
-        } catch (IOException e) {}
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return false;
     }
 
     /**
      * 월별 날짜 수 계산 (윤년 고려)
-     *
-     * @param year 연도
-     * @param month 월 (1~12)
-     * @return 해당 월의 날짜 수
      */
     public int getDaysInMonth(int year, int month) {
         switch (month) {
             case 2: return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0) ? 29 : 28;
-            case 4: case 6: case 9: case 11: return 30;
+            case 4:
+            case 6:
+            case 9:
+            case 11: return 30;
             default: return 31;
         }
-    }
-
-    /**
-     * 취소 버튼 처리 메서드
-     *
-     * 주의: JPanel로 변환 후에는 dispose() 대신 화면 전환 로직이 필요합니다.
-     * 현재는 사용하지 않으며, 향후 SidePanel 전환 로직으로 대체될 예정입니다.
-     *
-     * @param component 부모 컴포넌트 (사용 안 함)
-     */
-    @Deprecated
-    public void handleCancel(Component component) {
-        // JPanel에서는 dispose() 불가능
-        // TODO: SidePanel로 이전 화면 전환 로직 구현 필요
-        // 예: SidePanel.getInstance().showContent(new SignInView());
     }
 
     private void clearFields(JTextField tfId, JPasswordField pfPw, JTextField tfName,
@@ -124,5 +156,29 @@ public class SignUpService {
         cbYear.setSelectedIndex(0);
         cbMonth.setSelectedIndex(0);
         cbDay.setSelectedIndex(0);
+    }
+
+    // 생년월일을 기준으로 현재 학년(고1~고3 / N수)을 추정 (정수)
+    private int calculateGradeFromBirth(int year, int month, int day) {
+        Calendar now = Calendar.getInstance();
+        int currentYear = now.get(Calendar.YEAR);
+
+        int diff = currentYear - year;
+
+        if (diff == 16) return 1; // 고1
+        if (diff == 17) return 2; // 고2
+        if (diff == 18) return 3; // 고3
+        if (diff >= 19) return 4; // N수
+        return 0; // 아직 고등학생이 아닌 경우
+    }
+
+    private String gradeIntToLabel(int grade) {
+        return switch (grade) {
+            case 1 -> "고1";
+            case 2 -> "고2";
+            case 3 -> "고3";
+            case 4 -> "N수";
+            default -> "미지정";
+        };
     }
 }
