@@ -7,6 +7,11 @@ import com.project.app.view.*;
 
 import javax.swing.*;
 
+import com.project.app.service.SignInService;
+import com.project.app.view.SignInView;
+import com.project.app.controller.LoginController;
+
+
 /**
  * 애플리케이션 메인 진입점
  * 
@@ -66,6 +71,12 @@ public class App {
                 
                 // 5. View에 Controller 설정
                 instructorsPageView.setController(instructorController);
+                
+                // ========== 로그인(SignIn) 관련 초기화 ==========
+                SignInView signInView = SignInView.getInstance();   // ★ 꼭 getInstance 사용
+                SignInService signInService = new SignInService();
+                LoginController loginController = new LoginController(signInView, signInService);
+                // 생성자 안에서 initListeners()가 호출되면서 버튼 리스너가 연결됨
                 
                 // ========== 메인 프레임 생성 및 표시 ==========
                 SidePanel sidePanel = SidePanel.getInstance();

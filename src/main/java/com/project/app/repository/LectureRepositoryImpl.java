@@ -2,136 +2,229 @@ package com.project.app.repository;
 
 import com.project.app.model.Lecture;
 
-import java.io.File;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class LectureRepositoryImpl implements LectureRepository{
-    private static ArrayList<Lecture> lectureList=new ArrayList<>();
+/**
+ * LectureRepository 구현체 (파일 기반 버전)
+ *
+ * - LectureData.txt 파일에서 강의 정보를 읽어서 메모리에 보관
+ * - 강의 ID는 문자열("L001")과 숫자(1) 두 가지 방식으로 모두 조회 가능하도록 저장
+ *
+ * LectureData.txt 형식 (14개 컬럼, '/' 구분):
+ * 0: lectureId      (예: L001)
+ * 1: academy        (예: A1)
+ * 2: subject        (국어, 수학, ...)
+ * 3: year           (예: 2027)
+ * 4: title
+ * 5: instructor
+ * 6: textbook
+ * 7: lecturePrice
+ * 8: textbookPrice
+ * 9: description
+ * 10: targetGrade   (예: 고3,N수)
+ * 11: capacity
+ * 12: dayOfWeek     (예: 월, 화, 수, ...)
+ * 13: time          (예: 1,2,3,4 or 7,8,9)
+ */
+public class LectureRepositoryImpl implements LectureRepository {
 
-    public LectureRepositoryImpl() {
-        loadLecturesFromFile("src/main/data/LectureData.txt");
+    private static final LectureRepositoryImpl instance = new LectureRepositoryImpl();
+
+    public static LectureRepositoryImpl getInstance() {
+        return instance;
     }
 
-    public void loadLecturesFromFile(String filename) {
-        lectureList.clear();
+    private static final String LECTURE_DATA_FILE = "LectureData.txt";
 
-        // 파일 존재 여부 확인
-        File file = new File(filename);
-        System.out.println("[Repository] 파일 경로: " + file.getAbsolutePath());
-        System.out.println("[Repository] 파일 존재: " + file.exists());
-        System.out.println("[Repository] 파일 크기: " + file.length() + " bytes");
+    // "L001" → Lecture
+    private final Map<String, Lecture> storeById = new ConcurrentHashMap<>();
+    // 1 → Lecture
+    private final Map<Integer, Lecture> storeByNumericId = new ConcurrentHashMap<>();
 
-        Scanner filein = openFile(filename);
+    /**
+     * 생성자
+     * - App.java에서 new LectureRepositoryImpl() 로도 사용할 수 있도록 public 유지
+     * - 생성 시 데이터 파일을 읽어 메모리에 로딩
+     */
+    public LectureRepositoryImpl() {
+        loadFromFile();
+    }
 
-        boolean isFirstLine = true;
-        int lineCount = 0;
+    /**
+     * LectureData.txt 파일을 읽어 강의 정보를 메모리에 적재
+     */
+    private void loadFromFile() {
+        storeById.clear();
+        storeByNumericId.clear();
 
-        while (filein.hasNextLine()) {
-            String line = filein.nextLine();
-            lineCount++;
+        File file = new File(LECTURE_DATA_FILE);
+        if (!file.exists()) {
+            System.err.println("[LectureRepositoryImpl] 데이터 파일 없음: " + file.getAbsolutePath());
+            return;
+        }
 
-            if (isFirstLine) {
-                System.out.println("[Repository] 헤더 줄: " + line);
-                isFirstLine = false;
-                continue;
-            }
-            if (line.trim().isEmpty()) continue;
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
 
-            String[] parts = line.split("/");
-            System.out.println("[Repository] 줄 " + lineCount + " - 필드 개수: " + parts.length);
+            String line;
+            boolean firstLine = true;
 
-            // 필드 개수 체크 (17개 또는 18개 허용)
-            if (parts.length < 17) {
-                System.out.println("[Repository] 줄 " + lineCount + " 스킵 - 필드 부족 (필드: " + parts.length + "개)");
-                continue;
-            }
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty()) continue;
 
-            try {
-                // 이미지 경로 처리 (18번째 필드가 있을 때만)
-                String thumbnailPath = "";
-                if (parts.length >= 18 && !parts[17].trim().isEmpty()) {
-                    String thumbnailFileName = parts[17].trim();
-                    thumbnailPath = "src/main/resources/lectureThumbnail/" + thumbnailFileName;
+                // 헤더 스킵 (첫 줄에 "강의ID" 들어있는지 체크)
+                if (firstLine) {
+                    firstLine = false;
+                    if (line.contains("강의ID")) {
+                        continue;
+                    }
                 }
 
+                String[] parts = line.split("/");
+                if (parts.length < 14) {
+                    System.err.println("[LectureRepositoryImpl] 잘못된 형식의 라인: " + line);
+                    continue;
+                }
+
+                for (int i = 0; i < parts.length; i++) {
+                    parts[i] = parts[i].trim();
+                }
+
+                String lectureId   = parts[0]; // 예: L001
+                String academy     = parts[1];
+                String subject     = parts[2];
+                int year           = parseInt(parts[3], 0);
+                String title       = parts[4];
+                String instructor  = parts[5];
+                String textbook    = parts[6];
+                int lecturePrice   = parseInt(parts[7], 0);
+                int textbookPrice  = parseInt(parts[8], 0);
+                String description = parts[9];
+                String targetGrade = parts[10];
+                int capacity       = parseInt(parts[11], 30);
+                String dayOfWeek   = parts[12];
+                String time        = parts[13];
+
+                // 데이터 파일에는 rating/currentEnrolled/location/thumbnail 정보가 없으므로 기본값 사용
+                double rating       = 0.0;
+                int currentEnrolled = 0;
+                String location     = null;
+                String thumbnail    = null;
+
                 Lecture lecture = new Lecture(
-                        parts[0].trim(),   // lectureId
-                        parts[1].trim(),   // academy
-                        parts[2].trim(),   // subject
-                        Integer.parseInt(parts[3].trim()),   // year
-                        parts[4].trim(),   // title
-                        parts[5].trim(),   // instructor
-                        parts[6].trim(),   // textbook
-                        Integer.parseInt(parts[7].trim()),   // lecturePrice
-                        Integer.parseInt(parts[8].trim()),   // textbookPrice
-                        parts[9].trim(),   // location
-                        parts[10].trim(),  // description
-                        parts[11].trim(),  // targetGrade
-                        Double.parseDouble(parts[12].trim()),  // rating
-                        Integer.parseInt(parts[13].trim()),    // currentEnrolled
-                        Integer.parseInt(parts[14].trim()),    // capacity
-                        parts[15].trim(),  // dayOfWeek
-                        parts[16].trim(),  // time
-                        thumbnailPath      // 빈 문자열 또는 이미지 경로
+                        lectureId,
+                        academy,
+                        subject,
+                        year,
+                        title,
+                        instructor,
+                        textbook,
+                        lecturePrice,
+                        textbookPrice,
+                        location,
+                        description,
+                        targetGrade,
+                        rating,
+                        currentEnrolled,
+                        capacity,
+                        dayOfWeek,
+                        time,
+                        thumbnail
                 );
-                lectureList.add(lecture);
-                System.out.println("[Repository] 줄 " + lineCount + " 로드 완료: " + parts[0]);
-            } catch (NumberFormatException e) {
-                System.err.println("[Repository] 줄 " + lineCount + " 파싱 오류: " + e.getMessage());
-                System.err.println("[Repository] 문제 줄: " + line);
-            }
-        }
 
-        System.out.println("[Repository] 총 로드된 강의 수: " + lectureList.size());
-        filein.close();
+                // plan은 파일에 없으므로 기본값(0) 그대로 두거나 필요하면 setPlan 호출 가능
+                // lecture.setPlan(0);
+
+                save(lecture); // 내부 맵에 저장
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public static Scanner openFile(String filename) {
-        Scanner filein = null;
+    private int parseInt(String s, int defaultValue) {
+        if (s == null) return defaultValue;
         try {
-            filein = new Scanner(new File(filename));
-        } catch (Exception e) {
-            System.out.printf("파일 오픈 실패: %s\n", filename);
-            throw new RuntimeException(e);
+            return Integer.parseInt(s.replace(",", "").trim());
+        } catch (NumberFormatException e) {
+            return defaultValue;
         }
-        return filein;
     }
 
-    public void save(Lecture lecture){
-        lectureList.add(lecture);
+    private double parseDouble(String s, double defaultValue) {
+        if (s == null) return defaultValue;
+        try {
+            return Double.parseDouble(s.trim());
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 
-    // id로 강의 찾기
+    /**
+     * "L001" → 1 같이 문자열 ID에서 숫자 부분만 추출
+     */
+    private int extractNumericId(String lectureId) {
+        if (lectureId == null) return -1;
+        String digits = lectureId.replaceAll("\\D", ""); // 숫자만 남기기
+        if (digits.isEmpty()) return -1;
+        try {
+            return Integer.parseInt(digits);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
+    // ========== 인터페이스 구현 ==========
+
     @Override
-    public Lecture findById(String id){
-        for(Lecture lec:lectureList){
-            if(id.equals(lec.getLectureId())){
-                return lec;
+    public Lecture findById(String lectureId) {
+        if (lectureId == null) return null;
+        return storeById.get(lectureId);
+    }
+
+    @Override
+    public Lecture findById(int numericId) {
+        return storeByNumericId.get(numericId);
+    }
+
+    @Override
+    public List<Lecture> findById(List<String> lectureIds) {
+        List<Lecture> result = new ArrayList<>();
+        if (lectureIds == null) return result;
+
+        for (String id : lectureIds) {
+            Lecture lec = findById(id);
+            if (lec != null) {
+                result.add(lec);
             }
         }
-        return null;
+        return result;
     }
+
     @Override
-    public ArrayList<Lecture> findAll(){
-        return lectureList;
+    public List<Lecture> findAll() {
+        return new ArrayList<>(storeById.values());
     }
+
     @Override
-    public List<Lecture> findByIds(List<String> lectureIds){
-        // null 체크 및 빈 리스트 체크
-        if (lectureIds == null || lectureIds.isEmpty()) {
-            return new ArrayList<>();
+    public void save(Lecture lecture) {
+        if (lecture == null) return;
+
+        String lectureId = lecture.getLectureId();
+        if (lectureId != null) {
+            storeById.put(lectureId, lecture);
+
+            int numericId = extractNumericId(lectureId);
+            if (numericId > 0) {
+                storeByNumericId.put(numericId, lecture);
+            }
         }
-        
-        // 성능 최적화: HashSet으로 변환하여 O(1) 조회
-        java.util.Set<String> idSet = new java.util.HashSet<>(lectureIds);
-        
-        // lectureList에서 idSet에 포함된 강의만 필터링
-        return lectureList.stream()
-                .filter(lecture -> lecture != null && lecture.getLectureId() != null)
-                .filter(lecture -> idSet.contains(lecture.getLectureId()))
-                .collect(Collectors.toList());
     }
 }
