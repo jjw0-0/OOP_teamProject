@@ -1,20 +1,9 @@
 package com.project.app;
 
-import com.project.app.controller.InstructorController;
-import com.project.app.controller.LectureController;
-import com.project.app.repository.InstructorRepository;
-import com.project.app.repository.InstructorRepositoryImpl;
-import com.project.app.repository.LectureRepository;
-import com.project.app.repository.LectureRepositoryImpl;
-import com.project.app.repository.ReviewRepository;
-import com.project.app.repository.ReviewRepositoryImpl;
-import com.project.app.repository.TextbookRepository;
-import com.project.app.repository.TextbookRepositoryImpl;
-import com.project.app.service.InstructorService;
-import com.project.app.service.LectureService;
-import com.project.app.view.InstructorsPageView;
-import com.project.app.view.LecturePageView;
-import com.project.app.view.SidePanel;
+import com.project.app.controller.*;
+import com.project.app.repository.*;
+import com.project.app.service.*;
+import com.project.app.view.*;
 
 import javax.swing.*;
 

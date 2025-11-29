@@ -5,7 +5,7 @@ import javax.swing.JOptionPane;
 import com.project.app.dto.LoginRequest;
 import com.project.app.dto.LoginResponse;
 import com.project.app.service.SignInService;
-import com.project.app.view.HomePageView;
+import com.project.app.view.LecturePageView;
 import com.project.app.view.SignInView;
 import com.project.app.view.SignUpView;
 import com.project.app.view.SidePanel;
@@ -113,7 +113,7 @@ public class LoginController {
      * 홈 화면으로 전환 (로그인 성공 후)
      */
     private void navigateToHome() {
-        SidePanel.getInstance().showContent(HomePageView.getInstance());
-        SidePanel.getInstance().setSelectedItem(SidePanel.MenuItem.HOME);
+        SidePanel.getInstance().showContent(LecturePageView.getInstance());
+        SidePanel.getInstance().setSelectedItem(SidePanel.MenuItem.LECTURE);
     }
 }

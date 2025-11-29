@@ -100,7 +100,7 @@ public class SidePanel extends JFrame {
      * - 메뉴 추가/수정 시 한 곳에서 관리 가능
      */
     public enum MenuItem {
-        HOME("홈", "home.png"),
+        //HOME("홈", "home.png"),
         LECTURE("강의", "lecture.png"),
         INSTRUCTOR("강사", "instructor.png"),
         MYPAGE("마이페이지", "mypage.png"),
@@ -235,7 +235,7 @@ public class SidePanel extends JFrame {
 
         // 주요 메뉴 아이템: HOME, LECTURE, INSTRUCTOR, MYPAGE, HELP
         MenuItem[] mainMenuItems = {
-            MenuItem.HOME,
+            //MenuItem.HOME,
             MenuItem.LECTURE,
             MenuItem.INSTRUCTOR,
             MenuItem.MYPAGE,
@@ -328,9 +328,9 @@ public class SidePanel extends JFrame {
      */
     private void setupDefaultMenuListeners() {
         // 홈 페이지
-        setMenuListener(MenuItem.HOME, e -> {
-            showContent(HomePageView.getInstance());
-        });
+        // setMenuListener(MenuItem.HOME, e -> {
+        //     showContent(HomePageView.getInstance());
+        // });
 
         // 강의 목록
         setMenuListener(MenuItem.LECTURE, e -> {
