@@ -5,44 +5,42 @@ import com.project.app.model.Lecture;
 import java.util.List;
 
 /**
- * Lecture Data Access Interface
+ * LectureRepository
  *
- * 특징:
- * - 강의 정보 조회
- * - 강사별, 과목별 필터링 지원
+ * - Lecture 엔티티에 대한 데이터 접근 인터페이스
+ * - 현재는 파일 기반 구현체(LectureRepositoryImpl)를 사용
+ * - 추후 DB, 다른 저장소로 교체 가능
+ *
+ * 주의:
+ * - 기존 코드 호환을 위해 findById 메서드를 파라미터 타입으로 오버로드해서 사용
+ *   * String  : "L001" 같은 강의 ID
+ *   * int     : 1 같은 숫자 ID (결제/내 강의에서 사용)
+ *   * List<String> : 강사 → 여러 강의 ID 조회(InstructorService)
  */
 public interface LectureRepository {
 
-    // ========== 조회 메서드 ==========
-
     /**
-     * 강의 ID로 강의 조회
+     * 문자열 강의 ID (예: "L001")로 강의 조회
      */
-    Lecture findById(String id);
+    Lecture findById(String lectureId);
 
     /**
-     * 모든 강의 목록 조회
+     * 숫자 강의 ID (예: 1)로 강의 조회
+     */
+    Lecture findById(int numericId);
+
+    /**
+     * 문자열 강의 ID 목록으로 여러 강의 조회
+     */
+    List<Lecture> findById(List<String> lectureIds);
+
+    /**
+     * 전체 강의 목록 조회
      */
     List<Lecture> findAll();
 
     /**
-     * 강사명으로 강의 목록 조회
+     * 강의 저장 또는 갱신
      */
-    //List<Lecture> findByInstructorName(String instructorName);
-
-    /**
-     * 강사 ID로 강의 목록 조회
-     * (강사 ID는 강사명과 매칭)
-     */
-    //List<Lecture> findByInstructorId(String instructorId);
-
-    /**
-     * 과목으로 강의 목록 조회
-     */
-    //List<Lecture> findBySubject(String subject);
-
-    /**
-     * 강의 ID 목록으로 강의 목록 조회
-     */
-    List<Lecture> findByIds(List<String> lectureIds);
+    void save(Lecture lecture);
 }
