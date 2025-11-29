@@ -189,8 +189,15 @@ public class InstructorService {
                 break;
             case "reviewScore":
             default:
-                // 평점순은 리뷰가 없으므로 이름순으로 대체
-                sorted.sort(Comparator.comparing(Instructor::getName));
+                // 평점순 정렬: 각 강사의 리뷰 평균 별점으로 정렬 (내림차순)
+                sorted.sort((i1, i2) -> {
+                    List<Review> reviews1 = reviewRepository.findByInstructorId(i1.getId());
+                    List<Review> reviews2 = reviewRepository.findByInstructorId(i2.getId());
+                    double avgRating1 = calculateAverageRating(reviews1);
+                    double avgRating2 = calculateAverageRating(reviews2);
+                    // 내림차순 정렬 (평점 높은 순)
+                    return Double.compare(avgRating2, avgRating1);
+                });
                 break;
         }
 
